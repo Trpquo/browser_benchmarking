@@ -1,0 +1,1 @@
+This is the repostiory for working on benchmarking scripts and techniques for comparing different browser mechanisms for creating animations and other layout effects.
