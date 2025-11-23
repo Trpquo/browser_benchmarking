@@ -19,9 +19,9 @@ function pushElement(name, ordinal, settings, container, step) {
 
 function pushSVG(name, ordinal, settings, container, step) {
     const element = document.createElementNS('http://www.w3.org/2000/svg', name)
-    element.setAttribute('cx', (ordinal % 50) * step)
-    element.setAttribute('cy', Math.floor(ordinal / 50) * step)
-    element.setAttribute('r', step)
+    const halfstep = step/2
+    element.setAttribute('cx', halfstep + (ordinal % 50) * step)
+    element.setAttribute('cy', halfstep + Math.floor(ordinal / 50) * step)
     
     if (settings.transformations) {
 	animateTransform(element, settings)
@@ -57,22 +57,36 @@ function animateAbsolute(element, settings, ordinal, step) {
     element.style.position = "absolute"
     const top = Math.floor(ordinal / 50)
     const left = (ordinal % 50)
-    const animationDefinition = {
-	top: [
+    const topAnim = [
 	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
 	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
 	    `calc(${top*step+step/2}px + ${random(movement)*distance}rem)`,
 	    `calc(${top*step+step/2}px + ${random(movement)*distance}rem)`,
 	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
-	],
-	left: [
+	]
+    const leftAnim = [
 	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
 	    `calc(${left*step+step/2}px + ${random(movement)*distance}rem)`,
 	    `calc(${left*step+step/2}px + ${random(movement)*distance}rem)`,
 	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
 	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
-	],
-    }
+	]
+    const vertAnim = [
+	    top*step + random(movement)*distance*10,
+	    top*step + random(movement)*distance*10,
+	    top*step+step/2 + random(movement)*distance*10,
+	    top*step+step/2 + random(movement)*distance*10,
+	    top*step + random(movement)*distance*10,
+	]
+    const horizAnim = [
+	    left*step + random(movement)*distance*10,
+	    left*step+step/2 + random(movement)*distance*10,
+	    left*step+step/2 + random(movement)*distance*10,
+	    left*step + random(movement)*distance*10,
+	    left*step + random(movement)*distance*10,
+    ]
+    console.log(settings.mode.indexOf('SVG'))
+    const animationDefinition = settings.mode.indexOf('SVG') === 0 ? {cx: vertAnim, cy: horizAnim} : {top: topAnim, left: leftAnim};
     if (color || opacity) { animateColor(animationDefinition, settings) }
     element.animate(animationDefinition, animationDuration)
 }

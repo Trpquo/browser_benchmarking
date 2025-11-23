@@ -19,11 +19,11 @@ function renderAnimation(event) {
 	    }
 	    break;
 	case "SVG+CSS":
-	    const svg = document.createElement('svg')
-	    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-	    svg.setAttribute('viewBox', `0 0 ${step*50} ${step*50}`)
+	    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+	    /* svg.setAttributeNS(null, 'xmlns', 'http://www.w3.org/2000/svg') */
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
 	    /* svg.setAttribute('viewBox', `0 0 ${step*50} ${step*Math.ceil(settings.increment/50)}`) */
-	    svg.setAttribute('preserveAspectRatio',"xMidYMid meet")
+	    /* svg.setAttribute('preserveAspectRatio',"xMidYMid meet") */
 	    for (i=0; i<settings.increment; i++) {
 		el = pushSVG("circle", i, settings, svg, step)
 	    }
