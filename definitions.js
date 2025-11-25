@@ -7,7 +7,7 @@ const random = (cond)=>cond ? Math.random() : 0;
 function pushElement(name, ordinal, settings, container, step) {
     const element = document.createElement(name)
     if (settings.transformations) {
-	animateTransform(element, settings)
+	animateTransform(element, settings, step)
     }
     else {
 	animateAbsolute(element, settings, ordinal, step)
@@ -24,7 +24,7 @@ function pushSVG(name, ordinal, settings, container, step) {
     element.setAttribute('cy', halfstep + Math.floor(ordinal / 50) * step)
     console.log(element)
     if (settings.transformations) {
-	animateTransform(element, settings)
+	animateTransform(element, settings, step)
     }
     else {
 	animateAbsolute(element, settings, ordinal, step)
@@ -66,17 +66,18 @@ function animateElement(name, ordinal, settings, container, step) {
     return element
 }
 
-function animateTransform(element, settings) {
+function animateTransform(element, settings, step) {
     console.log("Animating with transform")
     const { random:movement, distance, color, blending:opacity } = settings
+    console.log(1+random(movement)*distance*step)
     const animationDefinition = {
 	offset: [0, .25, .5, .75, 1],
 	transform: [
-	    `translate(0rem, 0rem)`,
-	    `translate(${1+random(movement)*distance}rem, ${0+random(movement)*distance}rem)`,
-	    `translate(${1+random(movement)*distance}rem, ${1+random(movement)*distance}rem)`,
-	    `translate(${0+random(movement)*distance}rem, ${1+random(movement)*distance}rem)`,
-	    `translate(0rem, 0rem)`,
+	    `translate(0, 0)`,
+	    `translate(${step+random(movement)*distance*step}px, ${0+random(movement)*distance*step}px)`,
+	    `translate(${step+random(movement)*distance*step}px, ${step+random(movement)*distance*step}px)`,
+	    `translate(${0+random(movement)*distance*step}px, ${step+random(movement)*distance*step}px)`,
+	    `translate(0, 0)`,
 	],
     }
     if (color || opacity) { animateColor(animationDefinition, settings) }
@@ -90,18 +91,18 @@ function animateAbsolute(element, settings, ordinal, step) {
     const top = Math.floor(ordinal / 50)
     const left = (ordinal % 50)
     const topAnim = [
-	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
-	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
-	    `calc(${top*step+step/2}px + ${random(movement)*distance}rem)`,
-	    `calc(${top*step+step/2}px + ${random(movement)*distance}rem)`,
-	    `calc(${top*step}px + ${random(movement)*distance}rem)`,
+	    `calc(${top*step}px + ${random(movement)*distance*step}px)`,
+	    `calc(${top*step}px + ${random(movement)*distance*step}px)`,
+	    `calc(${top*step+step/2}px + ${random(movement)*distance*step}px)`,
+	    `calc(${top*step+step/2}px + ${random(movement)*distance*step}px)`,
+	    `calc(${top*step}px + ${random(movement)*distance*step}px)`,
 	]
     const leftAnim = [
-	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
-	    `calc(${left*step+step/2}px + ${random(movement)*distance}rem)`,
-	    `calc(${left*step+step/2}px + ${random(movement)*distance}rem)`,
-	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
-	    `calc(${left*step}px + ${random(movement)*distance}rem)`,
+	    `calc(${left*step}px + ${random(movement)*distance*step}px)`,
+	    `calc(${left*step+step/2}px + ${random(movement)*distance*step}px)`,
+	    `calc(${left*step+step/2}px + ${random(movement)*distance*step}px)`,
+	    `calc(${left*step}px + ${random(movement)*distance*step}px)`,
+	    `calc(${left*step}px + ${random(movement)*distance*step}px)`,
 	]
     const yAnim = [
 	    top*step + random(movement)*distance*15,
