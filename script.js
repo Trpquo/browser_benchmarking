@@ -14,22 +14,23 @@ function renderAnimation(event) {
     let el = null;
     switch(settings.mode) {
 	case "HTML+CSS":
-	    for (i=0; i<settings.increment; i++) {
+	    for (let i=0; i<settings.increment; i++) {
 		el = pushElement("span", i, settings, container, step)
 	    }
 	    break;
 	case "SVG+CSS":
 	    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	    /* svg.setAttributeNS(null, 'xmlns', 'http://www.w3.org/2000/svg') */
 	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    /* svg.setAttribute('viewBox', `0 0 ${step*50} ${step*Math.ceil(settings.increment/50)}`) */
-	    /* svg.setAttribute('preserveAspectRatio',"xMidYMid meet") */
-	    for (i=0; i<settings.increment; i++) {
-		el = pushSVG("circle", i, settings, svg, step)
+	    for (let i=0; i<settings.increment; i++) {
 	    }
 	    container.appendChild(svg)
 	    break;
+	case "HTML+JS":
+	    for (let i=0; i<settings.increment; i++) {
+		el = animateElement("span", i, settings, container, step)
+	    }
+	    break;
 	default:
-	    console.log(`Action for ${settings.mode} is not defined.`)
+	    console.warn(`Action for ${settings.mode} is not defined.`)
     }
 }
