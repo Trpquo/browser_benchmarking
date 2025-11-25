@@ -39,6 +39,9 @@ function renderAnimation(event) {
 	    }
 	    container.appendChild(svg)
 	    break;
+	case "JS+Canvas":
+	    el = animateCanvas(settings, container, step)
+	    break;
 	default:
 	    console.warn(`Action for ${settings.mode} is not defined.`)
     }

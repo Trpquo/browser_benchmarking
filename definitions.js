@@ -23,7 +23,6 @@ function pushSVG(name, ordinal, settings, container, step) {
     const halfstep = step/2
     element.setAttribute('cx', halfstep + (ordinal % 50) * step)
     element.setAttribute('cy', halfstep + Math.floor(ordinal / 50) * step)
-    console.log(element)
     if (settings.transformations) {
 	animateTransform(element, settings, step)
     }
