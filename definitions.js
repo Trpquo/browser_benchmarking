@@ -22,7 +22,7 @@ function pushSVG(name, ordinal, settings, container, step) {
     const halfstep = step/2
     element.setAttribute('cx', halfstep + (ordinal % 50) * step)
     element.setAttribute('cy', halfstep + Math.floor(ordinal / 50) * step)
-    
+    console.log(element)
     if (settings.transformations) {
 	animateTransform(element, settings)
     }
@@ -117,7 +117,6 @@ function animateAbsolute(element, settings, ordinal, step) {
 	    left*step + random(movement)*distance*15,
 	    left*step + random(movement)*distance*15,
     ]
-    console.log(settings.mode === "SVG+CSS")
     const animationDefinition = settings.mode === "SVG+CSS"  ? {cx: xAnim, cy: yAnim} : {top: topAnim, left: leftAnim};
     if (color || opacity) { animateColor(animationDefinition, settings) }
     element.animate(animationDefinition, animationDuration)

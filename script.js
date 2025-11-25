@@ -22,6 +22,7 @@ function renderAnimation(event) {
 	    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
 	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
 	    for (let i=0; i<settings.increment; i++) {
+		el = pushSVG("circle", i, settings, svg, step)
 	    }
 	    container.appendChild(svg)
 	    break;
