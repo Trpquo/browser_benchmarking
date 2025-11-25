@@ -11,7 +11,7 @@ function renderAnimation(event) {
     })
     container.innerHTML = ""; // erase all contents
     const step = window.innerWidth / 50;
-    let el = null;
+    let el = null, svg = null;
     switch(settings.mode) {
 	case "HTML+CSS":
 	    for (let i=0; i<settings.increment; i++) {
@@ -19,7 +19,7 @@ function renderAnimation(event) {
 	    }
 	    break;
 	case "SVG+CSS":
-	    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
 	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
 	    for (let i=0; i<settings.increment; i++) {
 		el = pushSVG("circle", i, settings, svg, step)
@@ -30,6 +30,14 @@ function renderAnimation(event) {
 	    for (let i=0; i<settings.increment; i++) {
 		el = animateElement("span", i, settings, container, step)
 	    }
+	    break;
+	case "SVG+JS":
+	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
+	    for (let i=0; i<settings.increment; i++) {
+		el = animateElement("circle", i, settings, svg, step)
+	    }
+	    container.appendChild(svg)
 	    break;
 	default:
 	    console.warn(`Action for ${settings.mode} is not defined.`)
