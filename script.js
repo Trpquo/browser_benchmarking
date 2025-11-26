@@ -1,3 +1,5 @@
+import GLanimateCanvas from './threeGL.js'
+
 const form = document.getElementById("dashboard")
 const container = document.getElementById("container")
 form.addEventListener('submit', renderAnimation)
@@ -41,6 +43,9 @@ function renderAnimation(event) {
 	    break;
 	case "JS+Canvas":
 	    el = animateCanvas(settings, container, step)
+	    break;
+	case "WebGL+Canvas":
+	    el = GLanimateCanvas(settings, container, step)
 	    break;
 	default:
 	    console.warn(`Action for ${settings.mode} is not defined.`)

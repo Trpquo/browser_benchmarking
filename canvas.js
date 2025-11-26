@@ -1,7 +1,6 @@
 function animateCanvas(settings, container, step) {
     console.log("Animating with Canvas API.")
     const { increment:count, random:movement, distance:multiplier, color, blending:opacity } = settings, inch = multiplier/50
-    console.log(random(movement))
     const element = document.createElement("canvas")
     element.setAttribute('height', step*(Math.ceil(settings.increment/50)+5))
     element.setAttribute('width', step*50)
