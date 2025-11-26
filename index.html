@@ -20,6 +20,15 @@
 		 border: 0;
 		 margin-top: 1rem;
 	     }
+	     fieldset.fps {
+		 float: right;
+		 input {
+		     width: 4rem;
+		     background-color: #333;
+		     color: #df6;		     
+		     text-align: right;
+		 }
+	     }
 	 }
 
 	 #container {
@@ -74,7 +83,7 @@
 		<fieldset>
 		    <legend>Options</legend>
 		    <label for="increment">Element count</label>
-		    <input name="increment" id="increment" type="number" value="10" min="1" max="10000" /> | 
+		    <input name="increment" id="increment" type="number" value="10" min="1" /> | 
 		    <input name="random" id="random" type="checkbox"/>
 		    <label for="random">Random movement</label> | 
 		    <label for="distance">Distance</label>
@@ -87,6 +96,11 @@
 		    <label for="transformations">Use transformatons</label>
 		</fieldset>
 		<input type="submit" value="Generate" />
+		<fieldset class="fps">
+		    <legend>Measure</legend>
+		    <input name="fps" id="fps" type="text" value="0"/>
+		    <label for="fps">FPS</label>
+		</fieldset>
 	    </form>
 	</div>
 	<div id="container"></div>
@@ -106,5 +120,7 @@
 	<script src="threeGL.js" type="module"></script>
 	
 	<script src="script.js" type="module"></script>
+	<script src="fps.js" type="module"></script>
+
     </body>
 </html>
