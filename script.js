@@ -29,16 +29,12 @@ function renderAnimation(event) {
 	    container.appendChild(svg)
 	    break;
 	case "HTML+JS":
-	    for (let i=0; i<settings.increment; i++) {
-		el = animateElement("span", i, settings, container, step)
-	    }
+	    animateElements("span", settings, container, step)
 	    break;
 	case "SVG+JS":
 	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
 	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    for (let i=0; i<settings.increment; i++) {
-		el = animateElement("circle", i, settings, svg, step)
-	    }
+	    el = animateElements("circle", settings, svg, step)
 	    container.appendChild(svg)
 	    break;
 	case "JS+Canvas":

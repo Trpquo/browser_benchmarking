@@ -95,14 +95,6 @@ function GLanimateCanvas(settings, container, step) {
 	return a + (b - a) * t;
     }
 
-    // color distance calculator
-    function colorDistance(c1, c2) {
-	const dr = c1.r - c2.r
-	const dg = c1.g - c2.g
-	const db = c1.b - c2.b
-	return Math.sqrt(dr*dr + dg*dg + db*db)
-    }
-
     // Animation update loop
     function updateDotsAnimation(time) {
 	const t = (time % duration) / duration;
