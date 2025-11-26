@@ -45,8 +45,8 @@ function GLanimateCanvas(settings, container, step) {
 
     // Create grid of dots with base positions on pixel coordinates
     for(let i = 0; i < count; i++) {
-	const row = Math.floor(i / dotsPerRow);
-	const col = i % dotsPerRow;
+	const col = i % dotsPerRow
+	const row = Math.floor(i / dotsPerRow)
 
 	// Initail random color & opacity
 	const material = new THREE.MeshBasicMaterial({transparent: true})
@@ -58,18 +58,18 @@ function GLanimateCanvas(settings, container, step) {
 	// Base pixel coordinates; start top-left at (0,0)
 	// Position each dot with offsets to form grid
 	const baseX = col * (dotRadius + distance) + dotRadius;
-	const baseY = window.innerHeight - (row * (dotRadius + distance) + 2*dotRadius);
+	const baseY = window.innerHeight - (row * (dotRadius + distance) + 3*dotRadius);
 
 	dot.userData.basePos = new THREE.Vector2(baseX, baseY);
 	dot.position.set(baseX, baseY, 0);
 
 	// Keyframe offsets for the square path, pixels (side = dotDiameterPx)
 	keyframes = [
-	    new THREE.Vector2(0, distance),
-	    new THREE.Vector2(distance + random(movement)*distance*multiplier, distance - random(movement)*distance*multiplier),
-	    new THREE.Vector2(distance + random(movement)*distance*multiplier, 0 - random(movement)*distance*multiplier),
+	    new THREE.Vector2(0, distance*2),
+	    new THREE.Vector2(distance*2 + random(movement)*distance*multiplier, distance*2 - random(movement)*distance*multiplier),
+	    new THREE.Vector2(distance*2 + random(movement)*distance*multiplier, 0 - random(movement)*distance*multiplier),
 	    new THREE.Vector2(0 + random(movement)*distance*multiplier, 0 - random(movement)*distance*multiplier),
-	    new THREE.Vector2(0, distance)
+	    new THREE.Vector2(0, distance*2)
 	];
 
 	dot.keyframes = keyframes
