@@ -11,8 +11,17 @@
 	 }
 	 #dashboard {
 	     padding: 1rem;
+	     padding-left: 220px;
 	     background-color: lightgray;
 
+	     span {
+		 white-space: nowrap;
+		 &:not(:last-of-type) {
+		 padding-right: .5rem;
+		 margin-right: .5rem;
+		 border-right: 2px solid gray;
+		 }
+	     }
 	     input[type=submit] {
 		 padding: .5rem;
 		 background-color: forestgreen;
@@ -82,18 +91,30 @@
 		</fieldset>
 		<fieldset>
 		    <legend>Options</legend>
-		    <label for="increment">Element count</label>
-		    <input name="increment" id="increment" type="number" value="10" min="1" /> | 
-		    <input name="random" id="random" type="checkbox"/>
-		    <label for="random">Random movement</label> | 
-		    <label for="distance">Distance</label>
-		    <input name="distance" id="distance" type="number" value="1" min="1" max="100" /> | 
-		    <input name="color" id="color" type="checkbox"/>
-		    <label for="color">Random colors</label> | 
-		    <input name="blending" id="blending" type="checkbox"/>
-		    <label for="blending">Add blending</label> | 
-		    <input name="transformations" id="transformations" type="checkbox" checked/>
-		    <label for="transformations">Use transformatons</label>
+			<span>
+				<label for="increment">Element count</label>
+				<input name="increment" id="increment" type="number" value="10" min="1" />
+			</span>
+			<span>
+				<input name="random" id="random" type="checkbox" />
+				<label for="random">Random movement</label>
+			</span>
+			<span>
+				<label for="distance">Distance</label>
+				<input name="distance" id="distance" type="number" value="1" min="1" max="100" />
+			</span>
+			<span>
+				<input name="color" id="color" type="checkbox" />
+				<label for="color">Random colors</label>
+			</span>
+			<span>
+				<input name="blending" id="blending" type="checkbox" />
+				<label for="blending">Add blending</label>
+			</span>
+			<span>
+				<input name="transformations" id="transformations" type="checkbox" checked />
+				<label for="transformations">Use transformations</label>
+			</span>
 		</fieldset>
 		<input type="submit" value="Generate" />
 		<fieldset class="fps">
