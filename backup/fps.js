@@ -26,3 +26,4 @@ function fpsLoop(now, terminate) {
 	cancelAnimationFrame(FPSFrameRequest)
     }
 }
+

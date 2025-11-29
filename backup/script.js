@@ -46,8 +46,7 @@ function renderAnimation(event) {
 	default:
 	    console.warn(`Action for ${settings.mode} is not defined.`)
     }
-
-// turn FPS measurement ON/OFF
+    // turn FPS measurement ON/OFF
     if (settings.fps_on==="on") {
 	if (FPSFrameRequest) {
 	    cancelAnimationFrame(FPSFrameRequest)

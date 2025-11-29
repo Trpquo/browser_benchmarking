@@ -19,6 +19,15 @@
 			<option value="JS+Canvas">JS + Canvas</option>
 			<option value="WebGL+Canvas">WebGL + Canvas</option>
 		    </select>
+		    <!-- <input name="mode" list="modes" value=""/>
+			 <datalist id="modes">
+			 <option value="HTML+CSS">HTML + CSS</option>
+			 <option value="HTML+JS">HTML + JS</option>
+			 <option value="SVG+CSS">SVG + CSS</option>
+			 <option value="SVG+JS">SVG + JS</option>
+			 <option value="JS+Canvas">JS + Canvas</option>
+			 <option value="WebGL+Canvas">WebGL + Canvas</option>
+			 </datalist> -->
 		</fieldset>
 		<fieldset>
 		    <legend>Options</legend>
@@ -48,20 +57,17 @@
 			</span>
 		</fieldset>
 		<input type="submit" value="Generate" />
-
-<fieldset class="fps">
-	    <legend>Measure</legend>
-	    <input name="fps_on" id="fps_on" type="checkbox" />
-	    <label for="fps_on">ON/OFF</label>
-	    <input name="fps" id="fps" type="text" value="OFF"/>
-	    <label for="fps">FPS</label>
-	</fieldset>
-    </form>
-</div>
-
-<div id="container"></div>
-
-<script src="common.js" type="text/javascript"></script>
+		<fieldset class="fps">
+		    <legend>Measure</legend>
+		    <input name="fps_on" id="fps_on" type="checkbox" />
+		    <label for="fps_on">ON/OFF</label>
+		    <input name="fps" id="fps" type="text" value="OFF"/>
+		    <label for="fps">FPS</label>
+		</fieldset>
+	    </form>
+	</div>
+	<div id="container"></div>
+	<script src="common.js" type="text/javascript"></script>
 	<script src="css.js" type="text/javascript"></script>
 	<script src="javaScript.js" type="text/javascript"></script>
 	<script src="canvas.js" type="text/javascript"></script>

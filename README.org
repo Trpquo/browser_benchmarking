@@ -1,1 +1,295 @@
+* A Cross-Device and Cross-OS Benchmark of Modern Web Animation Systems
+
 This is the repostiory for working on benchmarking scripts and techniques for comparing different browser mechanisms for creating animations and other layout effects.
+
+** Application function description
+
+For purpose described above, we created an application for paramtrically generating web animations using native web technologies, of which we count eight applicable approaches:
+    1. CSS animations of absolutely postioned DOM elements in HTML structure
+    2. CSS animations of DOM elements in HTML sturcture using its transormations engine
+    3. CSS animations of DOM elements in SVG structure
+    4. CSS aniations of DOM elements in SVG structure using CSS's transformations engine
+    5. JavaScript animations of absolutely postitioned DOM elements in HTML structure using its ~requestAnimationFrame~ loop engine
+    6. JavaScript animatios of DOM elements in SVG structure using its ~requestAnimationFrame~ loop engine
+    7. JavaScript generated animations based on rendering images onscreen using Canvas API an JS's ~requestAnimationFrame~ loop engine
+    8. WebGL rendered animations based on rendering images onscreen using Canvas API an JS's ~requestAnimationFrame~ loop engine
+
+** User interface construction
+
+Minimal graphic user interface of the application was build using native HTML and CSS technologies. HTML structure of the document presents simple form for entering generation parameters:
+
+#+begin_src html :tangle index.html
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Benchmarking</title>
+	<link href="style.css" rel="stylesheet"/>
+    </head>
+    <body>
+	<div class="formular">
+	    <form id="dashboard" method="post">
+		<fieldset>
+		    <legend>Main</legend>
+		    <label for="mode">Choose a platform</label>
+		    <select id="mode" name="mode">
+			<option value="HTML+CSS">HTML + CSS</option>
+			<option value="HTML+JS">HTML + JS</option>
+			<option value="SVG+CSS">SVG + CSS</option>
+			<option value="SVG+JS">SVG + JS</option>
+			<option value="JS+Canvas">JS + Canvas</option>
+			<option value="WebGL+Canvas">WebGL + Canvas</option>
+		    </select>
+		</fieldset>
+		<fieldset>
+		    <legend>Options</legend>
+			<span>
+				<label for="increment">Element count</label>
+				<input name="increment" id="increment" type="number" value="10" min="1" />
+			</span>
+			<span>
+				<input name="random" id="random" type="checkbox" checked />
+				<label for="random">Random movement</label>
+			</span>
+			<span>
+				<label for="distance">Distance</label>
+				<input name="distance" id="distance" type="number" value="5" min="1" max="100" />
+			</span>
+			<span>
+				<input name="color" id="color" type="checkbox" checked />
+				<label for="color">Random colors</label>
+			</span>
+			<span>
+				<input name="blending" id="blending" type="checkbox" checked />
+				<label for="blending">Add blending</label>
+			</span>
+			<span>
+				<input name="transformations" id="transformations" type="checkbox" checked />
+				<label for="transformations">Use transformations</label>
+			</span>
+		</fieldset>
+		<input type="submit" value="Generate" />
+#+end_src
+
+CSS styling continues this conservative trend to prevent taking over of system resources needed for rendering animations. 
+
+#+begin_src css :tangle style.css
+
+	 :root, :root > * {
+	     margin: 0;
+	     padding: 0;
+	     font-size: max(.5vw, 16px);
+	 }
+	 #dashboard {
+	     padding: 1rem;
+	     padding-left: 220px;
+	     background-color: lightgray;
+
+	     span {
+		 white-space: nowrap;
+		 &:not(:last-of-type) {
+		 padding-right: .5rem;
+		 margin-right: .5rem;
+		 border-right: 2px solid gray;
+		 }
+	     }
+	     input[type=submit] {
+		 padding: .5rem;
+		 background-color: forestgreen;
+		 color: white;
+		 border: 0;
+		 margin-top: 1rem;
+	     }
+	     fieldset.fps {
+		 float: right;
+		 #fps {
+		     width: 4rem;
+		     background-color: #333;
+		     color: #df6;		     
+		     text-align: right;
+		 }
+		 label[for=fps_on] {
+		     display: none;
+		 }
+	     }
+	 }
+
+	 #container {
+	     position: relative;
+
+	     div, span {
+		 display: inline-block;
+		 width: 2vw;
+		 height: 2vw;
+		 background-color: rgba(155,155,155,1);
+		 border-radius: 50%;
+		 animation-timing-function: linear;
+	     }
+	     svg {
+		 overflow: visible;
+		 g, circle {
+		     r: 1vw;
+		     fill: rgba(155,155,155,1);
+		     animation-timing-function: linear;
+		 }
+	     }
+	     canvas {
+		 display: block;
+	     }
+	 }
+#+end_src
+
+** Defining animations
+
+Three attrubutes are animated in all. Position of elements, their color and opacity. Elements displayed in animations are simple circular dots with width defined 
+
+
+** Completing the application 
+
+Finally the script is attached to bind animation generating functions to the event of GUI form submition and to pass on needed user defined parameters for animations to their respective generative funcitons.
+
+#+begin_src js :tangle script.js
+import GLanimateCanvas from './threeGL.js'
+
+const form = document.getElementById("dashboard")
+const container = document.getElementById("container")
+form.addEventListener('submit', renderAnimation)
+
+function renderAnimation(event) {
+    event.preventDefault()
+    const formData = new FormData(form)
+    const settings = {}
+    formData.forEach((value, key) => {
+	settings[key] = value
+    })
+    container.innerHTML = ""; // erase all contents
+    const step = window.innerWidth / 50;
+    let el = null, svg = null;
+    switch(settings.mode) {
+	case "HTML+CSS":
+	    for (let i=0; i<settings.increment; i++) {
+		el = pushElement("span", i, settings, container, step)
+	    }
+	    break;
+	case "SVG+CSS":
+	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
+	    for (let i=0; i<settings.increment; i++) {
+		el = pushSVG("circle", i, settings, svg, step)
+	    }
+	    container.appendChild(svg)
+	    break;
+	case "HTML+JS":
+	    animateElements("span", settings, container, step)
+	    break;
+	case "SVG+JS":
+	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
+	    el = animateElements("circle", settings, svg, step)
+	    container.appendChild(svg)
+	    break;
+	case "JS+Canvas":
+	    el = animateCanvas(settings, container, step)
+	    break;
+	case "WebGL+Canvas":
+	    el = GLanimateCanvas(settings, container, step)
+	    break;
+	default:
+	    console.warn(`Action for ${settings.mode} is not defined.`)
+    }
+#+end_src
+
+Additionally the onscreen FPS measurement tool is added to help track changes of hardware's abilty to generate number of frames frames per second. 
+
+Script for measuring FPS during execution uses a trick of counting how many animatin frames it can run in during the runtime of application:
+
+#+begin_src js :tangle fps.js
+let FPSLoopRequest = false
+let FPSFrameRequest = null
+
+const fpsElem = document.getElementById('fps');
+
+let lastTime = performance.now();
+let frameCount = 0;
+
+function fpsLoop(now, terminate) {
+    if (FPSLoopRequest) {
+	frameCount++;
+
+	const delta = now - lastTime;
+	// ažuriraj FPS otprilike svake sekunde
+	if (delta >= 1000) {
+            const fps = (frameCount * 1000) / delta;
+            fpsElem.value = fps.toFixed(2);
+            frameCount = 0;
+            lastTime = now;
+	}
+
+	FPSFrameRequest = requestAnimationFrame(fpsLoop);
+    } else {
+	console.log("Canceling FPS measure")
+	fpsElem.value = "OFF"
+	cancelAnimationFrame(FPSFrameRequest)
+    }
+}
+
+#+end_src
+
+The main interaction script is then extended to include the functionality of truning the FPS counter on or off with the submission of requests of generating animations.
+
+#+begin_src js :tangle script.js
+    // turn FPS measurement ON/OFF
+    if (settings.fps_on==="on") {
+	if (FPSFrameRequest) {
+	    cancelAnimationFrame(FPSFrameRequest)
+	}
+	FPSLoopRequest = true
+	requestAnimationFrame(fpsLoop)
+    } else {
+	FPSLoopRequest = false
+    }
+}
+#+end_src
+
+Interface for the widget is attached to the bottom of the form.
+
+#+begin_src html :tangle index.html
+		<fieldset class="fps">
+		    <legend>Measure</legend>
+		    <input name="fps_on" id="fps_on" type="checkbox" />
+		    <label for="fps_on">ON/OFF</label>
+		    <input name="fps" id="fps" type="text" value="OFF"/>
+		    <label for="fps">FPS</label>
+		</fieldset>
+	    </form>
+	</div>
+#+end_src
+
+The user interface form is followed by empty ~<div>~ element for serving as the stage for placing elements to be animated.
+
+#+begin_src html :tangle index.html
+	<div id="container"></div>
+#+end_src
+
+And in the end, loaded interface document is istructed to read-in scripts needed for generating mentioned animations.
+
+#+begin_src html :tangle index.html
+  
+	<script src="common.js" type="text/javascript"></script>
+	<script src="css.js" type="text/javascript"></script>
+	<script src="javaScript.js" type="text/javascript"></script>
+	<script src="canvas.js" type="text/javascript"></script>
+	<script type="importmap">
+	 {"imports": {
+		 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js",
+		 "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.181.2/examples/jsm/"
+	 }}
+	</script>
+	<script src="threeGL.js" type="module"></script>
+	
+	<script src="script.js" type="module"></script>
+	<script src="fps.js" type="text/javascript"></script>
+
+    </body>
+</html>
+#+end_src
