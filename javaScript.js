@@ -40,6 +40,10 @@ function animate(time=0) {
 	  segmentIndex = Math.floor(t * animation.segments),
 	  segmentT = (t * animation.segments) - segmentIndex
 
+    if (element.getContext("2d")) { // needed for clearing Canvas' stage
+    	ctx.clearRect(0, 0, element.width, element.height)
+    } 
+
     dots.forEach(({el, x, y, keyframes})=> {
 	const start = keyframes[segmentIndex],
 	      end = keyframes[segmentIndex + 1]
@@ -61,8 +65,8 @@ if (settings.mode.indexOf('HTML') === 0) {
 	el.setAttribute('cy', y + offsetY)
 	el.style.fill = colorStr(offsetColor)
 }
-});
-requestAnimationFrame(animate)
-}
-requestAnimationFrame(animate)
+	  });
+	  requestAnimationFrame(animate)
+    }
+    requestAnimationFrame(animate)
 }

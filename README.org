@@ -314,6 +314,26 @@ For JavaScript driven animations, dots are made from ~<span>~ elements in HTML s
 #+end_src
 
 **** For JavaScript driven Canvas animations
+
+Again, we first define the JavaScript function to catch user defined parameters for animation and then run functions for dots' array construction and animation rendering. In Canvas API (see [[https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API][MDN documentation]]), all elements are constructed virtually and then drawn onto ~<canvas>~ element, so the first task of our parent animation function is to create ~<canvas>~ element and place it onto our web pages staging area.
+
+#+begin_src js :noweb yes :tangle canvas.js
+  function JSanimateCanvas(settings, container) {
+      console.log('Animating on Canvas with JavaScript')
+      <<catch-parameters>>
+    const element = document.createElement("canvas")
+    element.setAttribute('width', dotDiameter*50)
+    element.setAttribute('height', dotDiameter*(10 + Math.ceil(count/50)))
+    container.appendChild(element)
+#+end_src
+
+Next, the loop is created to calculate initial positions, colors and animation keyframes for all requested dot elements. Here, in contrast to CSS or JavaScript driven animations, we do not need to create any new DOM elements. 
+
+#+begin_src js :noweb yes :tangle canvas.js
+  <<dots-loop-start>>
+  <<dots-loop-end>>
+#+end_src
+
 **** For WebGL driven Canvas animations
 
 *** Defining the animation function to be run
@@ -356,11 +376,13 @@ All that is left to do is to activate the animation for each predefined dot elem
 Besides the CSS engine, all other native web animation techniques rely on programatically triggering the loop to redraw every frame of animation, and so each of them has it's own unuque way of implementing changes frame by frame. But, there still are many common elements for functions of all animation definitions regardless of animation technology.
 
 #+name: animation-definition-start
-#+begin_src js
+#+begin_src js :noweb yes
   function animate(time=0) {
       const t = (time % animation.duration) / animation.duration,
   	  segmentIndex = Math.floor(t * animation.segments),
   	  segmentT = (t * animation.segments) - segmentIndex
+
+      <<canvas-clearance>>
 
       dots.forEach(({el, x, y, keyframes})=> {
   	const start = keyframes[segmentIndex],
@@ -379,10 +401,10 @@ Besides the CSS engine, all other native web animation techniques rely on progra
 
 #+name: animation-definition-end
 #+begin_src js
-  });
-  requestAnimationFrame(animate)
-  }
-  requestAnimationFrame(animate)
+	  });
+	  requestAnimationFrame(animate)
+      }
+      requestAnimationFrame(animate)
   }
 #+end_src
 **** For JavaScript driven animation of DOM elements
@@ -405,6 +427,38 @@ JavaScript run animation is defined so that it would update in change frame the 
 #+end_src
 
 **** For JavaScript driven animation within Canvas framework
+
+Animation based on Canvas' API is entirely run by JavaScript calculations of required dot positions and other property values. It uses predefined geometrical functions to define pixel areas on screen to be drawn at frame by frame.
+
+To begin with, we define a function to draw dot's circle.
+
+#+begin_src js :tangle canvas.js
+  function drawDot(cx, cy, color, r=dotDiameter/2) {
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, 2*Math.PI)
+      ctx.fillStyle = colorStr(color)
+      ctx.fill()
+      ctx.closePath()
+  }
+#+end_src
+
+Then all that is left is to define Canvas's rendering context and start the animation loop for each dot in an array.
+
+#+begin_src js :noweb yes :tangle canvas.js
+  const ctx  = element.getContext('2d')
+  <<animation-definition-start>>
+        drawDot(x + offsetX, y + offsetY, offsetColor)
+  <<animation-definition-end>>
+#+end_src
+
+And to clear Canvas' area one each animation loop start.
+#+name: canvas-clearance
+#+begin_src js 
+      if (element.getContext("2d")) { // needed for clearing Canvas' stage
+  	ctx.clearRect(0, 0, element.width, element.height)
+      } 
+#+end_src
+
 **** For WebGL driven animation within Canvas framework
 
 ** Completing the application 
@@ -537,7 +591,7 @@ And in the end, loaded interface document is instructed to read-in definitions n
   	<script src="common.js" type="text/javascript"></script>
   	<script src="css.js" type="text/javascript"></script>
   	<script src="javaScript.js" type="text/javascript"></script>
-  	<!-- <script src="canvas.js" type="text/javascript"></script> -->
+  	<script src="canvas.js" type="text/javascript"></script>
   	<!-- <script type="importmap"> -->
   	<!--  {"imports": { -->
   	<!-- 	 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js", -->
