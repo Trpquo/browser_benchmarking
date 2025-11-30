@@ -1,4 +1,4 @@
-import GLanimateCanvas from './threeGL.js'
+// import GLanimateCanvas from './threeGL.js'
 
 const form = document.getElementById("dashboard")
 const container = document.getElementById("container")
@@ -8,40 +8,36 @@ function renderAnimation(event) {
     event.preventDefault()
     const formData = new FormData(form)
     const settings = {}
-    formData.forEach((value, key) => {
+    formData.forEach((value, key)=>{
 	settings[key] = value
     })
-    container.innerHTML = ""; // erase all contents
-    const step = window.innerWidth / 50;
-    let el = null, svg = null;
+    container.innerHTML = "" // erase all content
+    let svg
+
     switch(settings.mode) {
 	case "HTML+CSS":
-	    for (let i=0; i<settings.increment; i++) {
-		el = pushElement("span", i, settings, container, step)
-	    }
+	    CSSanimateElements("span", settings, container)
 	    break;
 	case "SVG+CSS":
 	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    for (let i=0; i<settings.increment; i++) {
-		el = pushSVG("circle", i, settings, svg, step)
-	    }
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${dotDiameter*50} ${dotDiameter*50}`)
+	    CSSanimateElements("circle", settings, svg)
 	    container.appendChild(svg)
 	    break;
 	case "HTML+JS":
-	    animateElements("span", settings, container, step)
+	    JSanimateElements("span", settings, container)
 	    break;
 	case "SVG+JS":
 	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    el = animateElements("circle", settings, svg, step)
+	    svg.setAttributeNS(null, 'viewBox', `0 0 ${dotDiameter*50} ${dotDiameter*50}`)
+	    JSanimateElements("circle", settings, svg)
 	    container.appendChild(svg)
 	    break;
 	case "JS+Canvas":
-	    el = animateCanvas(settings, container, step)
+	    JSanimateCanvas(settings, container)
 	    break;
 	case "WebGL+Canvas":
-	    el = GLanimateCanvas(settings, container, step)
+	    GLanimateCanvas(settings, container)
 	    break;
 	default:
 	    console.warn(`Action for ${settings.mode} is not defined.`)

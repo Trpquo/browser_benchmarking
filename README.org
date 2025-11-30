@@ -19,56 +19,56 @@ For purpose described above, we created an application for paramtrically generat
 Minimal graphic user interface of the application was build using native HTML and CSS technologies. HTML structure of the document presents simple form for entering generation parameters:
 
 #+begin_src html :tangle index.html
-<!doctype html>
-<html>
-    <head>
-        <meta charset="UTF-8"/>
-        <title>Benchmarking</title>
-	<link href="style.css" rel="stylesheet"/>
-    </head>
-    <body>
-	<div class="formular">
-	    <form id="dashboard" method="post">
-		<fieldset>
-		    <legend>Main</legend>
-		    <label for="mode">Choose a platform</label>
-		    <select id="mode" name="mode">
-			<option value="HTML+CSS">HTML + CSS</option>
-			<option value="HTML+JS">HTML + JS</option>
-			<option value="SVG+CSS">SVG + CSS</option>
-			<option value="SVG+JS">SVG + JS</option>
-			<option value="JS+Canvas">JS + Canvas</option>
-			<option value="WebGL+Canvas">WebGL + Canvas</option>
-		    </select>
-		</fieldset>
-		<fieldset>
-		    <legend>Options</legend>
-			<span>
-				<label for="increment">Element count</label>
-				<input name="increment" id="increment" type="number" value="10" min="1" />
-			</span>
-			<span>
-				<input name="random" id="random" type="checkbox" checked />
-				<label for="random">Random movement</label>
-			</span>
-			<span>
-				<label for="distance">Distance</label>
-				<input name="distance" id="distance" type="number" value="5" min="1" max="100" />
-			</span>
-			<span>
-				<input name="color" id="color" type="checkbox" checked />
-				<label for="color">Random colors</label>
-			</span>
-			<span>
-				<input name="blending" id="blending" type="checkbox" checked />
-				<label for="blending">Add blending</label>
-			</span>
-			<span>
-				<input name="transformations" id="transformations" type="checkbox" checked />
-				<label for="transformations">Use transformations</label>
-			</span>
-		</fieldset>
-		<input type="submit" value="Generate" />
+  <!doctype html>
+  <html>
+      <head>
+          <meta charset="UTF-8"/>
+          <title>Benchmarking</title>
+  	<link href="style.css" rel="stylesheet"/>
+      </head>
+      <body>
+  	<div class="formular">
+  	    <form id="dashboard" method="post">
+  		<fieldset>
+  		    <legend>Main</legend>
+  		    <label for="mode">Choose a platform</label>
+  		    <select id="mode" name="mode">
+  			<option value="HTML+CSS">HTML + CSS</option>
+  			<option value="SVG+CSS">SVG + CSS</option>
+  			<option value="HTML+JS">HTML + JS</option>
+  			<option value="SVG+JS">SVG + JS</option>
+  			<option value="JS+Canvas">JS + Canvas</option>
+  			<option value="WebGL+Canvas">WebGL + Canvas</option>
+  		    </select>
+  		</fieldset>
+  		<fieldset>
+  		    <legend>Options</legend>
+  			<span>
+  				<label for="count">Element count</label>
+  				<input name="count" id="count" type="number" value="10" min="1" />
+  			</span>
+  			<span>
+  				<input name="random" id="random" type="checkbox" checked />
+  				<label for="random">Random movement</label>
+  			</span>
+  			<span>
+  				<label for="distance">Distance</label>
+  				<input name="distance" id="distance" type="number" value="5" min="1" max="20" />
+  			</span>
+  			<span>
+  			  <input name="color" id="color" type="checkbox" checked />
+  			  <label for="color">Random colors</label>
+  			</span>
+  			<span>
+  				<input name="blending" id="blending" type="checkbox" checked />
+  				<label for="blending">Add blending</label>
+  			</span>
+  			<span>
+  				<input name="transformations" id="transformations" type="checkbox" checked />
+  				<label for="transformations">Use transformations</label>
+  			</span>
+  		</fieldset>
+  		<input type="submit" value="Generate" />
 #+end_src
 
 CSS styling continues this conservative trend to prevent taking over of system resources needed for rendering animations. 
@@ -139,64 +139,323 @@ CSS styling continues this conservative trend to prevent taking over of system r
 	 }
 #+end_src
 
-** Defining animations
+** Defining and running animations
 
 Three attrubutes are animated in all. Position of elements, their color and opacity. Elements displayed in animations are simple circular dots with width defined 
 
+*** Common functions
+
+There are some common utility functions and global parameters that are defined in separtare file and placed into applications global context on pages first load.
+
+#+begin_src js :tangle common.js
+  // setting up dimentions of dots and other common animation parameters
+  const dotsPerRow = 50 
+  const dotDiameter = window.innerWidth / dotsPerRow
+  const animation = {
+      duration: 2000,
+      segments: 4,
+      iterations: Infinity
+  }
+
+  // common utility functions for generating random numbers when condition is met
+  const random = (cond)=>cond === "on" ? Math.random() : 0;
+  const spin = ()=> Math.random() < 0.5 ? -1 : 1;
+
+  // function to calculate random offset from common path
+  const push = (movement, multiplier)=>random(movement)*dotDiameter*multiplier*spin()/2
+
+  // function to calculate random color values, from 150-255 per RGB color channel; and .3-1 for opacity
+  const randomRGBA = (color, opacity)=>{
+      const r = Math.round(155 + random(color) * 100)
+      const g = Math.round(155 + random(color) * 100)
+      const b = Math.round(155 + random(color) * 100)
+      const a = opacity ? Math.random() * .7 + .3 : 1
+      return {r,g,b,a}
+  }
+  const colorStr = ({r,g,b,a})=>`rgba(${r},${g},${b},${a})`
+  // neutral color
+  const gray = {r:155,g:155,b:155,a:1}
+  const basicColor = colorStr(gray)
+
+  // const paint = (color, opacity)=>color ? randomRGBA(opacity) : basicColor
+#+end_src
+
+First commonly used function is the ~colorDistance~ calculator. It is based on finding the distance between two colors using pitagorean theorem: $d^2 = a^2 - b^2$ and is used througout the application to calculate the change in color needed in each animation frame. 
+
+#+begin_src js :tangle common.js
+  // color distance calculator
+  const colorDistance = (c1, c2)=>{
+      const dr = c1.r - c2.r
+      const dg = c1.g - c2.g
+      const db = c1.b - c2.b
+      return Math.sqrt(dr*dr + dg*dg + db*db)
+  }
+#+end_src
+
+Another especially useful and common function utilitzed in the application is the ~lerp~ function. The lerp function stands for Linear Interpolation. It’s a simple mathematical function that calculates a value between two numbers based on a parameter =t= that ranges from 0 to 1. Given two numbers =a= and =b=, and a parameter =t=: $lerp(a , b , t) = a + t × (b − a)$. When =t= = 0, the function returns =a=. When =t= = 1, the function returns =b=. When =t= is between 0 and 1, it returns a value proportionally between =a= and =b=. It’s typically used in animations to smoothly transition from one value to another.
+
+#+begin_src js :tangle common.js
+  // Linear interpolation
+  function lerp(a, b, t) {
+      return a + (b - a) * t;
+  }
+#+end_src
+
+The most important common function for our purpose is the one that generates keyframes for all requested dots based on its input parameters.
+
+#+begin_src js :tangle common.js
+  // function that generates five animation keyframes based on user-defined parameters 
+  const keyframesGenerator = (movement, multiplier, color, opacity)=>[
+      {top: 0, left: 0, color: gray},
+      {top: 0 + push(movement, multiplier), left: dotDiameter + push(movement, multiplier), color: randomRGBA(color, opacity)},
+      {top: dotDiameter + push(movement, multiplier), left: dotDiameter + push(movement, multiplier), color: randomRGBA(color, opacity)},
+      {top: dotDiameter + push(movement, multiplier), left: 0 + push(movement, multiplier), color: randomRGBA(color, opacity)},
+      {top: 0, left: 0, color: gray},
+  ] 
+#+end_src
+
+#+name: catch-parameters
+#+begin_src js 
+  const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
+  let keyframes = []
+  let dots = []
+#+end_src
+
+*** Construction of dots array
+
+All native web animation techniques tested with this application have to arrive its own method of constructing its dots' array primarily based on the fact of what the dots are going to be made of and what engine will render them.
+
+There are still a lot of commonalities. They all use the same loop definition for creating dots' array and calculating their initial positions and color. The loop begins with calculating the correct initial position for each dot.
+
+#+name: dots-loop-start
+#+begin_src js 
+  for (let i=0; i < count; i++) {
+      const col = i % dotsPerRow,
+	  row = Math.floor(i / dotsPerRow),
+	  x = col * dotDiameter,
+	  y = row * dotDiameter
+      let dot
+#+end_src
+
+The ending of common dot-creation loop showcases its main purpose in creating keyframes for all four segments of animation in regards to the parameters for animation defined in the GUI.
+
+#+name: dots-loop-end
+#+begin_src js
+      keyframes = keyframesGenerator(movement, multiplier, color, opacity)
+      dots.push({
+  	  el: dot,
+  	  x,
+  	  y,
+  	  keyframes
+      })
+  }
+#+end_src
+
+**** For CSS driven DOM element animations
+
+Special functions are developed for defining and running CSS driven animations within HTML and SVG document structures. Parent function creates the dot elements with their initial postions and colorations and stores them in the ~dots~ array.
+
+#+begin_src js :noweb yes :tangle css.js
+  function CSSanimateElements(name, settings, container) {
+      console.log('Animating with pure CSS.')
+      console.log(settings)
+      <<catch-parameters>>
+#+end_src
+
+The loop is then defined to create each needed element, place it onto documents animation stage and construct it's keyframes object.
+
+#+begin_src js :noweb yes :tangle css.js
+  <<dots-loop-start>>
+      if (name === "span") {
+  	dot = document.createElement(name)
+      }
+      else if (name === "circle") {
+  	dot = document.createElementNS('http://www.w3.org/2000/svg', name)
+      }
+      else {
+  	console.warn('Fatal error: Selected CSS animation option is not available!')
+  	return
+      }
+      container.appendChild(dot)
+  <<dots-loop-end>>
+#+end_src
+
+**** For JavaScript driven DOM element animations
+
+Special function is built for defining and running JavaScript driven animations within HTML or SVG document structures.
+
+#+begin_src js :noweb yes :tangle javaScript.js 
+  function JSanimateElements(name, settings, container) {
+      console.log('Animating with pure JavaScript.')
+      <<catch-parameters>>
+#+end_src
+
+For JavaScript driven animations, dots are made from ~<span>~ elements in HTML stucture, and from ~<circle>~ elements in SVG structure.
+
+#+begin_src js :noweb yes :tangle javaScript.js 
+      <<dots-loop-start>>
+
+  if (settings.mode.indexOf('HTML') === 0) {
+      dot = document.createElement(name)
+      dot.style.position = "absolute"
+      dot.style.left = x + "px"
+      dot.style.top = y + "px"
+  } else if (settings.mode.indexOf('SVG') === 0) {
+      dot = document.createElementNS('http://www.w3.org/2000/svg', name)
+      dot.setAttribute('cx', x)
+      dot.setAttribute('cy', y)
+  } else {
+      console.warn("Fatal error: Selected JS animation option is not available!")
+      return
+  }
+  container.appendChild(dot)
+
+      <<dots-loop-end>>
+#+end_src
+
+**** For JavaScript driven Canvas animations
+**** For WebGL driven Canvas animations
+
+*** Defining the animation function to be run
+**** For CSS driven animations
+
+CSS is the only technology native to web browsers that has built in animation engines that calculates transitional points from few given keyframes as their destination points. Because of that, there is no need to start an animation loop. The only thing needed for animations to run is for them to be defined and applied to targeted dots present in array. This is achieved through defining a helper function ~animate~ which adapts its sideeffects according to user's request for animations relying on CSS's transform API or for animations relying on CSS's capabilities on transitioning through numerical values of its properties. In all of its implementations, helper function relies on JavaScript's =Web animation API= (see [[https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API][MDN documentation]]).
+
+#+begin_src js :tangle css.js
+  function animate(dot, transformations, SVG) {
+      const definition = transformations ?
+  	  dot.keyframes.map( ({top, left, color})=>({ transform: `translate(${top}px,${left}px)`, backgroundColor: colorStr(color), fill: colorStr(color)  }) ) :
+  	      SVG ?
+  	        dot.keyframes.map( ({top, left, color})=>({ cy: dot.y + top, cx: dot.x + left, fill: colorStr(color) }) ) :
+  	        dot.keyframes.map( ({top, left, color})=>({ top: `${dot.y + top}px`, left: `${dot.x + left}px`, backgroundColor: colorStr(color) }) ) 
+      console.log(definition)
+      if (!transformations && !SVG) { dot.el.style.position = "absolute"}
+      dot.el.animate(definition, animation)
+  }
+#+end_src
+
+All that is left to do is to activate the animation for each predefined dot element.
+
+#+begin_src js :tangle css.js
+  dots.forEach( dot=>{
+      const SVG = settings.mode.indexOf('SVG') === 0
+      if (SVG) {
+  	dot.el.setAttribute('cy', dot.y)
+  	dot.el.setAttribute('cx', dot.x)
+      } else {
+  	dot.el.style.top = dot.y + "px"
+  	dot.el.style.left = dot.x + "px"
+      }
+     animate(dot, settings.transformations, SVG)     
+  })
+  }
+#+end_src
+
+**** Common steps to all programatically driven animations
+
+Besides the CSS engine, all other native web animation techniques rely on programatically triggering the loop to redraw every frame of animation, and so each of them has it's own unuque way of implementing changes frame by frame. But, there still are many common elements for functions of all animation definitions regardless of animation technology.
+
+#+name: animation-definition-start
+#+begin_src js
+  function animate(time=0) {
+      const t = (time % animation.duration) / animation.duration,
+  	  segmentIndex = Math.floor(t * animation.segments),
+  	  segmentT = (t * animation.segments) - segmentIndex
+
+      dots.forEach(({el, x, y, keyframes})=> {
+  	const start = keyframes[segmentIndex],
+  	      end = keyframes[segmentIndex + 1]
+  	      // Interpolated offsets
+  	      const offsetY = lerp(start.top, end.top, segmentT),
+  		    offsetX = lerp(start.left, end.left, segmentT),
+  		    r = lerp(start.color.r, end.color.r, segmentT),
+  		    g = lerp(start.color.g, end.color.g, segmentT),
+  		    b = lerp(start.color.b, end.color.b, segmentT),
+  		    a = lerp(start.color.a, end.color.a, segmentT),
+  		    offsetColor = {r,g,b,a}
+#+end_src
+
+... and common endings of animation's function definition that alongside trigger the start of animations and keep them running until interrupted by some other process. Running of animations is accomplished through JavaScripts native ~requestAnimationFrame~ API (see [[https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame][MDN documentation]]) which call's for the run of ~animate~ function once from the outer respective animation triggering function and then recursively from within the ~animate~ function.
+
+#+name: animation-definition-end
+#+begin_src js
+  });
+  requestAnimationFrame(animate)
+  }
+  requestAnimationFrame(animate)
+  }
+#+end_src
+**** For JavaScript driven animation of DOM elements
+
+JavaScript run animation is defined so that it would update in change frame the positions of all dot elements by updateing ~style.left~ and ~style.right~ properties of absolutely positioned HTML elements, or, vice versa, the ~cx~ and ~cy~ attributes of SVG elements.
+
+#+begin_src js :noweb yes :tangle javaScript.js
+  <<animation-definition-start>>
+  // Update CSS top and left properties | SVG cy and cx attributes
+  if (settings.mode.indexOf('HTML') === 0) {
+  	el.style.left = x + offsetX + "px"
+  	el.style.top = y + offsetY + "px"
+  	el.style.backgroundColor = colorStr(offsetColor)
+  } else if (settings.mode.indexOf('SVG') === 0) {
+  	el.setAttribute('cx', x + offsetX)
+  	el.setAttribute('cy', y + offsetY)
+  	el.style.fill = colorStr(offsetColor)
+  }
+  <<animation-definition-end>>
+#+end_src
+
+**** For JavaScript driven animation within Canvas framework
+**** For WebGL driven animation within Canvas framework
 
 ** Completing the application 
 
 Finally the script is attached to bind animation generating functions to the event of GUI form submition and to pass on needed user defined parameters for animations to their respective generative funcitons.
 
 #+begin_src js :tangle script.js
-import GLanimateCanvas from './threeGL.js'
+  // import GLanimateCanvas from './threeGL.js'
 
-const form = document.getElementById("dashboard")
-const container = document.getElementById("container")
-form.addEventListener('submit', renderAnimation)
+  const form = document.getElementById("dashboard")
+  const container = document.getElementById("container")
+  form.addEventListener('submit', renderAnimation)
 
-function renderAnimation(event) {
-    event.preventDefault()
-    const formData = new FormData(form)
-    const settings = {}
-    formData.forEach((value, key) => {
-	settings[key] = value
-    })
-    container.innerHTML = ""; // erase all contents
-    const step = window.innerWidth / 50;
-    let el = null, svg = null;
-    switch(settings.mode) {
-	case "HTML+CSS":
-	    for (let i=0; i<settings.increment; i++) {
-		el = pushElement("span", i, settings, container, step)
-	    }
-	    break;
-	case "SVG+CSS":
-	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    for (let i=0; i<settings.increment; i++) {
-		el = pushSVG("circle", i, settings, svg, step)
-	    }
-	    container.appendChild(svg)
-	    break;
-	case "HTML+JS":
-	    animateElements("span", settings, container, step)
-	    break;
-	case "SVG+JS":
-	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	    svg.setAttributeNS(null, 'viewBox', `0 0 ${step*50} ${step*50}`)
-	    el = animateElements("circle", settings, svg, step)
-	    container.appendChild(svg)
-	    break;
-	case "JS+Canvas":
-	    el = animateCanvas(settings, container, step)
-	    break;
-	case "WebGL+Canvas":
-	    el = GLanimateCanvas(settings, container, step)
-	    break;
-	default:
-	    console.warn(`Action for ${settings.mode} is not defined.`)
-    }
+  function renderAnimation(event) {
+      event.preventDefault()
+      const formData = new FormData(form)
+      const settings = {}
+      formData.forEach((value, key)=>{
+  	settings[key] = value
+      })
+      container.innerHTML = "" // erase all content
+      let svg
+
+      switch(settings.mode) {
+  	case "HTML+CSS":
+  	    CSSanimateElements("span", settings, container)
+  	    break;
+  	case "SVG+CSS":
+  	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  	    svg.setAttributeNS(null, 'viewBox', `0 0 ${dotDiameter*50} ${dotDiameter*50}`)
+  	    CSSanimateElements("circle", settings, svg)
+  	    container.appendChild(svg)
+  	    break;
+  	case "HTML+JS":
+  	    JSanimateElements("span", settings, container)
+  	    break;
+  	case "SVG+JS":
+  	    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  	    svg.setAttributeNS(null, 'viewBox', `0 0 ${dotDiameter*50} ${dotDiameter*50}`)
+  	    JSanimateElements("circle", settings, svg)
+  	    container.appendChild(svg)
+  	    break;
+  	case "JS+Canvas":
+  	    JSanimateCanvas(settings, container)
+  	    break;
+  	case "WebGL+Canvas":
+  	    GLanimateCanvas(settings, container)
+  	    break;
+  	default:
+  	    console.warn(`Action for ${settings.mode} is not defined.`)
+      }
 #+end_src
 
 Additionally the onscreen FPS measurement tool is added to help track changes of hardware's abilty to generate number of frames frames per second. 
@@ -271,25 +530,25 @@ The user interface form is followed by empty ~<div>~ element for serving as the 
 	<div id="container"></div>
 #+end_src
 
-And in the end, loaded interface document is istructed to read-in scripts needed for generating mentioned animations.
+And in the end, loaded interface document is instructed to read-in definitions needed for generating mentioned animations.
 
 #+begin_src html :tangle index.html
-  
-	<script src="common.js" type="text/javascript"></script>
-	<script src="css.js" type="text/javascript"></script>
-	<script src="javaScript.js" type="text/javascript"></script>
-	<script src="canvas.js" type="text/javascript"></script>
-	<script type="importmap">
-	 {"imports": {
-		 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js",
-		 "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.181.2/examples/jsm/"
-	 }}
-	</script>
-	<script src="threeGL.js" type="module"></script>
-	
-	<script src="script.js" type="module"></script>
-	<script src="fps.js" type="text/javascript"></script>
+    
+  	<script src="common.js" type="text/javascript"></script>
+  	<script src="css.js" type="text/javascript"></script>
+  	<script src="javaScript.js" type="text/javascript"></script>
+  	<!-- <script src="canvas.js" type="text/javascript"></script> -->
+  	<!-- <script type="importmap"> -->
+  	<!--  {"imports": { -->
+  	<!-- 	 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js", -->
+  	<!-- 	 "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.181.2/examples/jsm/" -->
+  	<!--  }} -->
+  	<!-- </script> -->
+  	<!-- <script src="threeGL.js" type="module"></script> -->
+  	
+  	<script src="script.js" type="module"></script>
+  	<script src="fps.js" type="text/javascript"></script>
 
-    </body>
-</html>
+      </body>
+  </html>
 #+end_src
