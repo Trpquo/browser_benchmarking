@@ -1,4 +1,4 @@
-// import GLanimateCanvas from './threeGL.js'
+import GLanimateCanvas from './threeGL.js'
 
 const form = document.getElementById("dashboard")
 const container = document.getElementById("container")

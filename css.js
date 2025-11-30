@@ -1,9 +1,9 @@
 function CSSanimateElements(name, settings, container) {
     console.log('Animating with pure CSS.')
-    console.log(settings)
     const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
     let keyframes = []
     let dots = []
+    let ctx = null // needed for Canvas clearance
 
 for (let i=0; i < count; i++) {
     const col = i % dotsPerRow,
@@ -11,6 +11,7 @@ for (let i=0; i < count; i++) {
 	  x = col * dotDiameter,
 	  y = row * dotDiameter
     let dot
+    keyframes = keyframesGenerator(movement, multiplier, color, opacity)
     if (name === "span") {
 	dot = document.createElement(name)
     }
@@ -22,7 +23,6 @@ for (let i=0; i < count; i++) {
 	return
     }
     container.appendChild(dot)
-    keyframes = keyframesGenerator(movement, multiplier, color, opacity)
     dots.push({
 	  el: dot,
 	  x,
@@ -37,7 +37,6 @@ function animate(dot, transformations, SVG) {
 	      SVG ?
 	        dot.keyframes.map( ({top, left, color})=>({ cy: dot.y + top, cx: dot.x + left, fill: colorStr(color) }) ) :
 	        dot.keyframes.map( ({top, left, color})=>({ top: `${dot.y + top}px`, left: `${dot.x + left}px`, backgroundColor: colorStr(color) }) ) 
-    console.log(definition)
     if (!transformations && !SVG) { dot.el.style.position = "absolute"}
     dot.el.animate(definition, animation)
 }

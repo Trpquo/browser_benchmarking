@@ -3,6 +3,7 @@ function JSanimateElements(name, settings, container) {
     const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
     let keyframes = []
     let dots = []
+    let ctx = null // needed for Canvas clearance
 
 for (let i=0; i < count; i++) {
         const col = i % dotsPerRow,
@@ -10,6 +11,7 @@ for (let i=0; i < count; i++) {
     	  x = col * dotDiameter,
     	  y = row * dotDiameter
         let dot
+        keyframes = keyframesGenerator(movement, multiplier, color, opacity)
 
 if (settings.mode.indexOf('HTML') === 0) {
     dot = document.createElement(name)
@@ -26,7 +28,6 @@ if (settings.mode.indexOf('HTML') === 0) {
 }
 container.appendChild(dot)
 
-        keyframes = keyframesGenerator(movement, multiplier, color, opacity)
         dots.push({
     	  el: dot,
     	  x,
@@ -40,8 +41,8 @@ function animate(time=0) {
 	  segmentIndex = Math.floor(t * animation.segments),
 	  segmentT = (t * animation.segments) - segmentIndex
 
-    if (element.getContext("2d")) { // needed for clearing Canvas' stage
-    	ctx.clearRect(0, 0, element.width, element.height)
+    if (renderer && ctx) { // needed for clearing Canvas' stage
+    	ctx.clearRect(0, 0, renderer.width, renderer.height)
     } 
 
     dots.forEach(({el, x, y, keyframes})=> {
@@ -68,5 +69,5 @@ if (settings.mode.indexOf('HTML') === 0) {
 	  });
 	  requestAnimationFrame(animate)
     }
-    requestAnimationFrame(animate)
+    animate()
 }

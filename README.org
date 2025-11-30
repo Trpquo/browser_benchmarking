@@ -143,7 +143,7 @@ CSS styling continues this conservative trend to prevent taking over of system r
 
 Three attrubutes are animated in all. Position of elements, their color and opacity. Elements displayed in animations are simple circular dots with width defined 
 
-*** Common functions
+*** Common parameters and functions
 
 There are some common utility functions and global parameters that are defined in separtare file and placed into applications global context on pages first load.
 
@@ -166,9 +166,9 @@ There are some common utility functions and global parameters that are defined i
 
   // function to calculate random color values, from 150-255 per RGB color channel; and .3-1 for opacity
   const randomRGBA = (color, opacity)=>{
-      const r = Math.round(155 + random(color) * 100)
-      const g = Math.round(155 + random(color) * 100)
-      const b = Math.round(155 + random(color) * 100)
+      const r = Math.round(155 + random(color) * 100 * spin())
+      const g = Math.round(155 + random(color) * 100 * spin())
+      const b = Math.round(155 + random(color) * 100 * spin())
       const a = opacity ? Math.random() * .7 + .3 : 1
       return {r,g,b,a}
   }
@@ -176,8 +176,6 @@ There are some common utility functions and global parameters that are defined i
   // neutral color
   const gray = {r:155,g:155,b:155,a:1}
   const basicColor = colorStr(gray)
-
-  // const paint = (color, opacity)=>color ? randomRGBA(opacity) : basicColor
 #+end_src
 
 First commonly used function is the ~colorDistance~ calculator. It is based on finding the distance between two colors using pitagorean theorem: $d^2 = a^2 - b^2$ and is used througout the application to calculate the change in color needed in each animation frame. 
@@ -219,13 +217,87 @@ The most important common function for our purpose is the one that generates key
   const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
   let keyframes = []
   let dots = []
+  let ctx = null // needed for Canvas clearance
+#+end_src
+
+*** Parent functions to setup and start the animation processes
+**** For CSS driven animations
+
+Special function is developed for defining and running CSS driven animations within HTML and SVG document structures. 
+
+#+begin_src js :noweb yes :tangle css.js
+  function CSSanimateElements(name, settings, container) {
+      console.log('Animating with pure CSS.')
+      <<catch-parameters>>
+#+end_src
+
+**** For JavaScript driven DOM element animations
+
+Special function is built for defining and running JavaScript driven animations within HTML or SVG document structures.
+
+#+begin_src js :noweb yes :tangle javaScript.js 
+  function JSanimateElements(name, settings, container) {
+      console.log('Animating with pure JavaScript.')
+      <<catch-parameters>>
+#+end_src
+
+**** For JavaScript driven Canvas animations
+
+Again, we firstly define the parent JavaScript function to catch user defined parameters for animation and then run functions for dots' array construction and animation rendering. In Canvas API (see [[https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API][MDN documentation]]), all characters are constructed virtually and then drawn onto ~<canvas>~ element, so the first task of our parent animation function is to create ~<canvas>~ element and place it onto our web pages staging area. Lastly, we define rendering context in which the animation will be realised.
+
+#+begin_src js :noweb yes :tangle canvas.js
+  function JSanimateCanvas(settings, container) {
+     console.log('Animating on Canvas with JavaScript')
+      <<catch-parameters>>
+    const renderer = document.createElement("canvas")
+    renderer.setAttribute('width', dotDiameter*50)
+    renderer.setAttribute('height', dotDiameter*(10 + Math.ceil(count/50)))
+    container.appendChild(renderer)
+
+    ctx  = renderer.getContext('2d')
+#+end_src
+
+**** For WebGL driven Canvas animations
+
+WebGL is a JavaScript API that renders high-performance 2D/3D graphics directly in the browser using the GPU, bypassing CPU limitations for smooth animations. In our application, WebGL (and its Three.js abstraction) drew arbitrary large number of animated circles efficiently in shaders by interpolating positions between keyframes on the GPU, unlike the plain JavaScript ~<span>~ or ~<circle>~ versions that updated DOM elements coordinate positions properties on the CPU each frame. This GPU acceleration enables scaling to massive particle counts with consistent 60fps performance, handling vertex position calculations and circular rendering in a single draw call. This would require completely new logic in constructing primary functions. To maintain consistency across the application in function definions, we are using the [[https://threejs.org][three.js]] JS abstraction layer. 
+
+Firstly, we import needed =three.js= library files through initial loading page file requests.
+#+name: threejs-imports
+#+begin_src html
+  	<script type="importmap">
+  	 {"imports": {
+  		 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js",
+  		 "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.181.2/examples/jsm/"
+  	 }}
+  	</script>
+#+end_src
+
+Then we can define our parent animating function and in it we create and append to DOM ~<canvas>~ element with =WebGl= context, needed to render requested animations on screen.
+
+#+begin_src js :noweb yes :tangle threeGL.js
+  import * as THREE from 'three' 
+
+  export default function GLanimateCanvas(settings, container) {
+        console.log('Animating on Canvas with WebGL')
+    	<<catch-parameters>>
+
+        const scene = new THREE.Scene(),
+	    sceneWidth = dotDiameter*50,
+  	  sceneHeight = dotDiameter*(10 + Math.ceil(count/50))
+        const camera = new THREE.OrthographicCamera(0, sceneWidth, sceneHeight, 0, -1000, 1000)
+        camera.position.z = 10
+        const renderer = new THREE.WebGLRenderer()
+        const gray = 0x666666, white = 0xffffff;
+        renderer.setSize(sceneWidth, sceneHeight)
+        renderer.setClearColor(white, 1)
+        container.appendChild(renderer.domElement)
 #+end_src
 
 *** Construction of dots array
 
 All native web animation techniques tested with this application have to arrive its own method of constructing its dots' array primarily based on the fact of what the dots are going to be made of and what engine will render them.
 
-There are still a lot of commonalities. They all use the same loop definition for creating dots' array and calculating their initial positions and color. The loop begins with calculating the correct initial position for each dot.
+There are still a lot of commonalities. They all use the same loop definition for creating dots' array and calculating their initial positions and color. The loop begins with calculating the correct initial position for each dot and creating keyframes for all four segments of animation in regards to the parameters for animation defined in the GUI.
 
 #+name: dots-loop-start
 #+begin_src js 
@@ -235,13 +307,13 @@ There are still a lot of commonalities. They all use the same loop definition fo
 	  x = col * dotDiameter,
 	  y = row * dotDiameter
       let dot
+      keyframes = keyframesGenerator(movement, multiplier, color, opacity)
 #+end_src
 
-The ending of common dot-creation loop showcases its main purpose in creating keyframes for all four segments of animation in regards to the parameters for animation defined in the GUI.
+The ending of common dot-creation loop stores all the attributes calculated based on user requested parameters of animation into an outer context's dots' array object.
 
 #+name: dots-loop-end
 #+begin_src js
-      keyframes = keyframesGenerator(movement, multiplier, color, opacity)
       dots.push({
   	  el: dot,
   	  x,
@@ -253,16 +325,7 @@ The ending of common dot-creation loop showcases its main purpose in creating ke
 
 **** For CSS driven DOM element animations
 
-Special functions are developed for defining and running CSS driven animations within HTML and SVG document structures. Parent function creates the dot elements with their initial postions and colorations and stores them in the ~dots~ array.
-
-#+begin_src js :noweb yes :tangle css.js
-  function CSSanimateElements(name, settings, container) {
-      console.log('Animating with pure CSS.')
-      console.log(settings)
-      <<catch-parameters>>
-#+end_src
-
-The loop is then defined to create each needed element, place it onto documents animation stage and construct it's keyframes object.
+Parent function creates the array of dot elements with their initial postions and colorations and stores them in the ~dots~ array. The loop is then defined to create each needed element, place it onto documents animation stage and construct it's keyframes object.
 
 #+begin_src js :noweb yes :tangle css.js
   <<dots-loop-start>>
@@ -281,14 +344,6 @@ The loop is then defined to create each needed element, place it onto documents 
 #+end_src
 
 **** For JavaScript driven DOM element animations
-
-Special function is built for defining and running JavaScript driven animations within HTML or SVG document structures.
-
-#+begin_src js :noweb yes :tangle javaScript.js 
-  function JSanimateElements(name, settings, container) {
-      console.log('Animating with pure JavaScript.')
-      <<catch-parameters>>
-#+end_src
 
 For JavaScript driven animations, dots are made from ~<span>~ elements in HTML stucture, and from ~<circle>~ elements in SVG structure.
 
@@ -315,19 +370,7 @@ For JavaScript driven animations, dots are made from ~<span>~ elements in HTML s
 
 **** For JavaScript driven Canvas animations
 
-Again, we first define the JavaScript function to catch user defined parameters for animation and then run functions for dots' array construction and animation rendering. In Canvas API (see [[https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API][MDN documentation]]), all elements are constructed virtually and then drawn onto ~<canvas>~ element, so the first task of our parent animation function is to create ~<canvas>~ element and place it onto our web pages staging area.
-
-#+begin_src js :noweb yes :tangle canvas.js
-  function JSanimateCanvas(settings, container) {
-      console.log('Animating on Canvas with JavaScript')
-      <<catch-parameters>>
-    const element = document.createElement("canvas")
-    element.setAttribute('width', dotDiameter*50)
-    element.setAttribute('height', dotDiameter*(10 + Math.ceil(count/50)))
-    container.appendChild(element)
-#+end_src
-
-Next, the loop is created to calculate initial positions, colors and animation keyframes for all requested dot elements. Here, in contrast to CSS or JavaScript driven animations, we do not need to create any new DOM elements. 
+Next, the loop is created to calculate initial positions, colors and animation keyframes for all requested dot elements. Here, in contrast to CSS or JavaScript driven animations, we do not need to create or place any new DOM elements. 
 
 #+begin_src js :noweb yes :tangle canvas.js
   <<dots-loop-start>>
@@ -336,7 +379,30 @@ Next, the loop is created to calculate initial positions, colors and animation k
 
 **** For WebGL driven Canvas animations
 
-*** Defining the animation function to be run
+For WebGL rendering to be achieved, strings of GLSL (OpenGL Shading Language) code need to be formatted and sent directly to the GPU processing unit as shaders. Library wrapper =three.js= achieves this functionality for us, but we still need to provide it values for vertex and fragment shaders. We accomplish this through our common dots' array generating loop without the need to create or place any new DOM elements.
+
+Before generating dot's array, it is advisable to separate out of the loop definitions that are common to all requested dot elements, and leave only ones specific to a certain dot to be recalculated in each loop iteration. 
+#+begin_src js :tangle threeGL.js
+    const geometry = new THREE.CircleGeometry(dotDiameter/2, 32) // minimal number of segments for visual comparability to other animation techniques
+#+end_src
+
+Because we need to accomodate for the need to test dot's color animations, defined by the /material/ of the dot, a new object needs to be created for each dot and keyframes parameters calculated for other animation methods need to be reclaibrated into new 2d vector objects.
+
+#+begin_src js :noweb yes :tangle threeGL.js
+  <<dots-loop-start>>
+
+  const material = new THREE.MeshBasicMaterial({transparent: opacity==="on"}) // simplest material comparable to render of other animation techniques; transparency needs to be explicitly turned on for blending effects
+  dot = new THREE.Mesh(geometry, material) // new object to represent dot in this frame
+  dot.userData.basePos = new THREE.Vector2(x,y)
+  dot.position.set(x,y,0)
+  dot.userData.targetColor = new THREE.Color(basicColor)
+  dot.userData.targetOpacity = 1
+  scene.add(dot)
+
+  <<dots-loop-end>>
+#+end_src
+
+*** Defining the main animation function to be run
 **** For CSS driven animations
 
 CSS is the only technology native to web browsers that has built in animation engines that calculates transitional points from few given keyframes as their destination points. Because of that, there is no need to start an animation loop. The only thing needed for animations to run is for them to be defined and applied to targeted dots present in array. This is achieved through defining a helper function ~animate~ which adapts its sideeffects according to user's request for animations relying on CSS's transform API or for animations relying on CSS's capabilities on transitioning through numerical values of its properties. In all of its implementations, helper function relies on JavaScript's =Web animation API= (see [[https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API][MDN documentation]]).
@@ -348,7 +414,6 @@ CSS is the only technology native to web browsers that has built in animation en
   	      SVG ?
   	        dot.keyframes.map( ({top, left, color})=>({ cy: dot.y + top, cx: dot.x + left, fill: colorStr(color) }) ) :
   	        dot.keyframes.map( ({top, left, color})=>({ top: `${dot.y + top}px`, left: `${dot.x + left}px`, backgroundColor: colorStr(color) }) ) 
-      console.log(definition)
       if (!transformations && !SVG) { dot.el.style.position = "absolute"}
       dot.el.animate(definition, animation)
   }
@@ -401,13 +466,13 @@ Besides the CSS engine, all other native web animation techniques rely on progra
 
 #+name: animation-definition-end
 #+begin_src js
-	  });
-	  requestAnimationFrame(animate)
+  	  });
+  	  requestAnimationFrame(animate)
       }
-      requestAnimationFrame(animate)
+      animate()
   }
 #+end_src
-**** For JavaScript driven animation of DOM elements
+**** For JavaScript driven animations of DOM elements
 
 JavaScript run animation is defined so that it would update in change frame the positions of all dot elements by updateing ~style.left~ and ~style.right~ properties of absolutely positioned HTML elements, or, vice versa, the ~cx~ and ~cy~ attributes of SVG elements.
 
@@ -426,7 +491,7 @@ JavaScript run animation is defined so that it would update in change frame the 
   <<animation-definition-end>>
 #+end_src
 
-**** For JavaScript driven animation within Canvas framework
+**** For JavaScript driven animations within Canvas framework
 
 Animation based on Canvas' API is entirely run by JavaScript calculations of required dot positions and other property values. It uses predefined geometrical functions to define pixel areas on screen to be drawn at frame by frame.
 
@@ -442,31 +507,78 @@ To begin with, we define a function to draw dot's circle.
   }
 #+end_src
 
-Then all that is left is to define Canvas's rendering context and start the animation loop for each dot in an array.
+Then all that is left is to start the animation loop for each dot in an array and send drawing instructions to Canvas's rendering context.
 
 #+begin_src js :noweb yes :tangle canvas.js
-  const ctx  = element.getContext('2d')
   <<animation-definition-start>>
         drawDot(x + offsetX, y + offsetY, offsetColor)
   <<animation-definition-end>>
 #+end_src
 
-And to clear Canvas' area one each animation loop start.
+And to clear Canvas' area on start of each animation loop.
 #+name: canvas-clearance
 #+begin_src js 
-      if (element.getContext("2d")) { // needed for clearing Canvas' stage
-  	ctx.clearRect(0, 0, element.width, element.height)
-      } 
+  if (renderer && ctx) { // needed for clearing Canvas' stage
+  	ctx.clearRect(0, 0, renderer.width, renderer.height)
+  } 
 #+end_src
 
-**** For WebGL driven animation within Canvas framework
+**** For WebGL driven animations within Canvas framework
 
-** Completing the application 
+And then we can define the animation function to be looped. Animation function also needs to accomodate that WebGLRenderer doesn't support =rgba= color space, so, in contrast to other techniques, the color definitions will have to be separated into color information and opacity information.
+
+#+begin_src js :noweb yes :tangle threeGL.js
+      <<animation-definition-start>>
+
+  el.position.x = x + offsetX + dotDiameter
+  el.position.y = sceneHeight - (y + offsetY + dotDiameter)
+
+  const mat = el.material
+  // Ensure colors are THREE.Color
+  if (!(mat.color instanceof THREE.Color)) {
+      mat.color = new THREE.Color(mat.color);
+  }
+  if (!(el.userData.targetColor instanceof THREE.Color)) {
+      el.userData.targetColor = new THREE.Color(el.userData.targetColor);
+  }
+  // Create a temporary color to store lerp result
+  if (!el.userData.currentColor) {
+      el.userData.currentColor = mat.color.clone();
+  }
+
+  if (color==="on" || opacity==="on") {
+      // Smoothly interpolate current color towards target color
+      el.userData.currentColor.lerp(el.userData.targetColor, 0.02);
+
+      // Update material color to current lerped color
+      mat.color.copy(el.userData.currentColor);
+
+      // Smoothly interpolate opacity
+      mat.opacity = lerp(mat.opacity, el.userData.targetOpacity, 0.02);
+
+      // When near target, pick new random color and opacity
+      if (colorDistance(mat.color, el.userData.targetColor) < 0.02 &&
+  	Math.abs(mat.opacity - el.userData.targetOpacity) < 0.02) {
+  	const {r,g,b} = randomRGBA(color,opacity)
+  	el.userData.targetColor = new THREE.Color(`rgb(${r},${g},${b})`)
+  	el.userData.targetOpacity = Math.random() * 0.5 + 0.5;
+      }	    
+  }
+
+    	  });
+  	  renderer.render(scene, camera)
+    	  requestAnimationFrame(animate)
+        }
+        animate()
+    }
+#+end_src
+
+** Finalising the application 
 
 Finally the script is attached to bind animation generating functions to the event of GUI form submition and to pass on needed user defined parameters for animations to their respective generative funcitons.
 
 #+begin_src js :tangle script.js
-  // import GLanimateCanvas from './threeGL.js'
+  import GLanimateCanvas from './threeGL.js'
 
   const form = document.getElementById("dashboard")
   const container = document.getElementById("container")
@@ -540,7 +652,6 @@ function fpsLoop(now, terminate) {
 
 	FPSFrameRequest = requestAnimationFrame(fpsLoop);
     } else {
-	console.log("Canceling FPS measure")
 	fpsElem.value = "OFF"
 	cancelAnimationFrame(FPSFrameRequest)
     }
@@ -586,20 +697,14 @@ The user interface form is followed by empty ~<div>~ element for serving as the 
 
 And in the end, loaded interface document is instructed to read-in definitions needed for generating mentioned animations.
 
-#+begin_src html :tangle index.html
+#+begin_src html :noweb yes :tangle index.html
     
   	<script src="common.js" type="text/javascript"></script>
   	<script src="css.js" type="text/javascript"></script>
   	<script src="javaScript.js" type="text/javascript"></script>
   	<script src="canvas.js" type="text/javascript"></script>
-  	<!-- <script type="importmap"> -->
-  	<!--  {"imports": { -->
-  	<!-- 	 "three": "https://cdn.jsdelivr.net/npm/three@v0.181.2/build/three.module.js", -->
-  	<!-- 	 "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.181.2/examples/jsm/" -->
-  	<!--  }} -->
-  	<!-- </script> -->
-  	<!-- <script src="threeGL.js" type="module"></script> -->
-  	
+  	<<threejs-imports>>
+  	<script src="threeGL.js" type="module"></script>
   	<script src="script.js" type="module"></script>
   	<script src="fps.js" type="text/javascript"></script>
 

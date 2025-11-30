@@ -16,9 +16,9 @@ const push = (movement, multiplier)=>random(movement)*dotDiameter*multiplier*spi
 
 // function to calculate random color values, from 150-255 per RGB color channel; and .3-1 for opacity
 const randomRGBA = (color, opacity)=>{
-    const r = Math.round(155 + random(color) * 100)
-    const g = Math.round(155 + random(color) * 100)
-    const b = Math.round(155 + random(color) * 100)
+    const r = Math.round(155 + random(color) * 100 * spin())
+    const g = Math.round(155 + random(color) * 100 * spin())
+    const b = Math.round(155 + random(color) * 100 * spin())
     const a = opacity ? Math.random() * .7 + .3 : 1
     return {r,g,b,a}
 }
@@ -26,8 +26,6 @@ const colorStr = ({r,g,b,a})=>`rgba(${r},${g},${b},${a})`
 // neutral color
 const gray = {r:155,g:155,b:155,a:1}
 const basicColor = colorStr(gray)
-
-// const paint = (color, opacity)=>color ? randomRGBA(opacity) : basicColor
 
 // color distance calculator
 const colorDistance = (c1, c2)=>{

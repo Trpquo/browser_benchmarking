@@ -21,7 +21,6 @@ function fpsLoop(now, terminate) {
 
 	FPSFrameRequest = requestAnimationFrame(fpsLoop);
     } else {
-	console.log("Canceling FPS measure")
 	fpsElem.value = "OFF"
 	cancelAnimationFrame(FPSFrameRequest)
     }
