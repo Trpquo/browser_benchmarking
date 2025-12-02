@@ -7,6 +7,8 @@
     padding: 1rem;
     padding-left: 220px;
     background-color: lightgray;
+    position:relative;
+    z-index: 10000;
 
     span {
 	 white-space: nowrap;
@@ -22,7 +24,7 @@
 	border-left: 2px solid darkgray;
     }
     input[type=submit] {
-	 padding: .5rem;
+	 padding: .5rem 1rem;
 	 background-color: forestgreen;
 	 color: white;
 	 border: 0;
@@ -44,7 +46,6 @@
 
 #container {
     position: relative;
-    overflow: hidden;
     padding-bottom: 20vh;
 
     div, span {
