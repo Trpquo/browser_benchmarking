@@ -525,7 +525,7 @@ Then all that is left is to start the animation loop for each dot in an array an
 And to clear Canvas' area on start of each animation loop.
 #+name: canvas-clearance
 #+begin_src js 
-  if (renderer && ctx) { // needed for clearing Canvas' stage
+  if (ctx) { // needed for clearing Canvas' stage
   	ctx.clearRect(0, 0, renderer.width, renderer.height)
   } 
 #+end_src

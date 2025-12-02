@@ -41,7 +41,7 @@ function animate(time=0) {
 	  segmentIndex = Math.floor(t * animation.segments),
 	  segmentT = (t * animation.segments) - segmentIndex
 
-    if (renderer && ctx) { // needed for clearing Canvas' stage
+    if (ctx) { // needed for clearing Canvas' stage
     	ctx.clearRect(0, 0, renderer.width, renderer.height)
     } 
 
