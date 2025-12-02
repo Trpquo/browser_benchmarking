@@ -26,7 +26,7 @@ for (let i=0; i < count; i++) {
 
 function drawDot(cx, cy, color, r=dotDiameter/2) {
     ctx.beginPath()
-    ctx.arc(cx, cy, r, 0, 2*Math.PI)
+    ctx.arc(cx + dotDiameter/2, cy + dotDiameter/2, r, 0, 2*Math.PI)
     ctx.fillStyle = colorStr(color)
     ctx.fill()
     ctx.closePath()
