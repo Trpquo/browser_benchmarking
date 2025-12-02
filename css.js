@@ -35,7 +35,7 @@ function animate(dot, transformations, SVG) {
     const definition = transformations ?
 	  dot.keyframes.map( ({top, left, color})=>({ transform: `translate(${top}px,${left}px)`, backgroundColor: colorStr(color), fill: colorStr(color)  }) ) :
 	      SVG ?
-	        dot.keyframes.map( ({top, left, color})=>({ cy: dot.y + top, cx: dot.x + left, fill: colorStr(color) }) ) :
+	        dot.keyframes.map( ({top, left, color})=>({ cy:  `${dot.y + top}px`, cx:  `${dot.x + left}px`, fill: colorStr(color) }) ) :
 	        dot.keyframes.map( ({top, left, color})=>({ top: `${dot.y + top}px`, left: `${dot.x + left}px`, backgroundColor: colorStr(color) }) ) 
     if (!transformations && !SVG) { dot.el.style.position = "absolute"}
     dot.el.animate(definition, animation)
@@ -44,8 +44,8 @@ function animate(dot, transformations, SVG) {
 dots.forEach( dot=>{
     const SVG = settings.mode.indexOf('SVG') === 0
     if (SVG) {
-	dot.el.setAttribute('cy', dot.y)
-	dot.el.setAttribute('cx', dot.x)
+	dot.el.setAttribute('cy', dot.y + "px")
+	dot.el.setAttribute('cx', dot.x + "px")
     } else {
 	dot.el.style.top = dot.y + "px"
 	dot.el.style.left = dot.x + "px"
