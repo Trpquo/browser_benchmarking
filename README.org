@@ -46,11 +46,11 @@ Minimal graphic user interface of the application was build using native HTML an
   			<option value="JS+Canvas">JS + Canvas</option>
   			<option value="WebGL+Canvas">WebGL + Canvas</option>
   		    </select>
-		    <span>
-			  <!-- applicable only for CSS animations -->
-			  <input name="transformations" id="transformations" type="checkbox" checked />
-			  <label for="transformations">Use transformations</label>
-		    </span>
+  		    <span>
+  			  <!-- applicable only for CSS animations -->
+  			  <input name="transformations" id="transformations" type="checkbox" checked />
+  			  <label for="transformations">Use transformations</label>
+  		    </span>
   		</fieldset>
   		<fieldset>
   		    <legend>Options</legend>
@@ -75,7 +75,8 @@ Minimal graphic user interface of the application was build using native HTML an
   				<label for="blending">Add blending</label>
   			</span>
   		</fieldset>
-  		<input type="submit" value="Generate" />
+  		<input title="animation" type="submit" value="Generate" />
+  		<a title="documentation" href="https://github.com/Trpquo/browser_benchmarking" target="blank">&#x1F6C8;</a>
 #+end_src
 
 CSS styling continues this conservative trend to prevent taking over of system resources needed for rendering animations. 
@@ -95,36 +96,51 @@ CSS styling continues this conservative trend to prevent taking over of system r
       z-index: 10000;
 
       span {
-  	 white-space: nowrap;
-  	 &:not(:last-of-type) {
-  	 padding-right: .5rem;
-  	 margin-right: .5rem;
-  	 border-right: 2px solid darkgray;
-  	 }
+  	white-space: nowrap;
+  	&:not(:last-of-type) {
+  	    padding-right: .5rem;
+  	    margin-right: .5rem;
+  	    border-right: 2px solid darkgray;
+  	}
       }
       select + span {
   	padding-left: .5rem;
   	margin-left: .5rem;
   	border-left: 2px solid darkgray;
       }
-      input[type=submit] {
-  	 padding: .5rem 1rem;
-  	 background-color: forestgreen;
-  	 color: white;
-  	 border: 0;
-  	 margin-top: 1rem;
+      input[type=submit], a {
+  	  padding: .5rem 1rem;
+  	  background-color: forestgreen;
+  	  color: white;
+  	  border: 0;
+  	  margin-top: 1rem;
+  	  font-weight: bold;
+  	  text-decoration: none;
+  	  transition: background-color .1s;
+  	  & + a {
+  	      background-color: royalblue;
+  	      padding: .40rem;
+  	      margin-left: .25rem;
+  	  }
+  	  &:hover {
+  	      background-color: darkslategray;
+  	      cursor: pointer;
+  	  }
+  	  &:active {
+  	      background-color: lightslategray;
+  	  }
       }
       fieldset.fps {
-  	 float: right;
-  	 #fps {
-  	     width: 4rem;
-  	     background-color: #333;
-  	     color: #df6;		     
-  	     text-align: right;
-  	 }
-  	 label[for=fps_on] {
-  	     display: none;
-  	 }
+  	float: right;
+  	#fps {
+  	    width: 4rem;
+  	    background-color: #333;
+  	    color: #df6;		     
+  	    text-align: right;
+  	}
+  	label[for=fps_on] {
+  	    display: none;
+  	}
       }
   }
 
@@ -133,23 +149,23 @@ CSS styling continues this conservative trend to prevent taking over of system r
       padding-bottom: 20vh;
 
       div, span {
-  	 display: inline-block;
-  	 width: 2vw;
-  	 height: 2vw;
-  	 background-color: rgba(155,155,155,1);
-  	 border-radius: 50%;
-  	 animation-timing-function: linear;
+  	display: inline-block;
+  	width: 2vw;
+  	height: 2vw;
+  	background-color: rgba(155,155,155,1);
+  	border-radius: 50%;
+  	animation-timing-function: linear;
       }
       svg {
-  	 overflow: visible;
-  	 g, circle {
-  	     r: 1vw;
-  	     fill: rgba(155,155,155,1);
-  	     animation-timing-function: linear;
-  	 }
+  	overflow: visible;
+  	g, circle {
+  	    r: 1vw;
+  	    fill: rgba(155,155,155,1);
+  	    animation-timing-function: linear;
+  	}
       }
       canvas {
-  	 display: block;
+  	display: block;
       }
   }
   .hidden {
