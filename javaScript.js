@@ -1,9 +1,7 @@
 function JSanimateElements(name, settings, container) {
     console.log('Animating with pure JavaScript.')
     const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
-    let keyframes = []
-    let dots = []
-    let ctx = null // needed for Canvas clearance
+    let keyframes = [], dots = [], ctx = null // ctx test needed for Canvas clearance
 
 for (let i=0; i < count; i++) {
         const col = i % dotsPerRow,

@@ -1,9 +1,7 @@
 function JSanimateCanvas(settings, container) {
    console.log('Animating on Canvas with JavaScript')
     const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
-    let keyframes = []
-    let dots = []
-    let ctx = null // needed for Canvas clearance
+    let keyframes = [], dots = [], ctx = null // ctx test needed for Canvas clearance
   const renderer = document.createElement("canvas")
   renderer.setAttribute('width', dotDiameter*50)
   renderer.setAttribute('height', dotDiameter*(10 + Math.ceil(count/50)))

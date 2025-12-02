@@ -10,7 +10,7 @@
 	    <form id="dashboard" method="post">
 		<fieldset>
 		    <legend>Main</legend>
-		    <label for="mode">Choose a platform</label>
+		    <label for="mode">Animation technique</label>
 		    <select id="mode" name="mode">
 			<option value="HTML+CSS">HTML + CSS</option>
 			<option value="SVG+CSS">SVG + CSS</option>
@@ -19,6 +19,11 @@
 			<option value="JS+Canvas">JS + Canvas</option>
 			<option value="WebGL+Canvas">WebGL + Canvas</option>
 		    </select>
+		    <span>
+			  <!-- applicable only for CSS animations -->
+			  <input name="transformations" id="transformations" type="checkbox" checked />
+			  <label for="transformations">Use transformations</label>
+		    </span>
 		</fieldset>
 		<fieldset>
 		    <legend>Options</legend>
@@ -41,10 +46,6 @@
 			<span>
 				<input name="blending" id="blending" type="checkbox" checked />
 				<label for="blending">Add blending</label>
-			</span>
-			<span>
-				<input name="transformations" id="transformations" type="checkbox" checked />
-				<label for="transformations">Use transformations</label>
 			</span>
 		</fieldset>
 		<input type="submit" value="Generate" />

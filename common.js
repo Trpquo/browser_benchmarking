@@ -12,7 +12,7 @@ const random = (cond)=>cond === "on" ? Math.random() : 0;
 const spin = ()=> Math.random() < 0.5 ? -1 : 1;
 
 // function to calculate random offset from common path
-const push = (movement, multiplier)=>random(movement)*dotDiameter*multiplier*spin()/2
+const push = (movement, multiplier)=>random(movement)*(dotDiameter/2)*multiplier*spin()
 
 // function to calculate random color values, from 150-255 per RGB color channel; and .3-1 for opacity
 const randomRGBA = (color, opacity)=>{

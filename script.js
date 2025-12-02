@@ -54,3 +54,14 @@ function renderAnimation(event) {
 	FPSLoopRequest = false
     }
 }
+
+const transformationsCheckbox = document.getElementById('transformations').parentNode,
+      modeSelect = document.getElementById('mode')
+
+modeSelect.addEventListener('change', ()=>{
+    if (modeSelect.value.indexOf('CSS') === -1) {
+	transformationsCheckbox.classList.add('hidden')
+    } else {
+	transformationsCheckbox.classList.remove('hidden')
+    }
+})

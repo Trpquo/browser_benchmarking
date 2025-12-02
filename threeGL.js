@@ -3,9 +3,7 @@ import * as THREE from 'three'
 export default function GLanimateCanvas(settings, container) {
       console.log('Animating on Canvas with WebGL')
   	const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
-  	let keyframes = []
-  	let dots = []
-  	let ctx = null // needed for Canvas clearance
+  	let keyframes = [], dots = [], ctx = null // ctx test needed for Canvas clearance
 
       const scene = new THREE.Scene(),
 	    sceneWidth = dotDiameter*50,

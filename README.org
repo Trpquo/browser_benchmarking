@@ -14,9 +14,9 @@ For purpose described above, we created an application for paramtrically generat
     7. =JavaScript= generated animations based on rendering images onscreen using =Canvas API= an JS's ~requestAnimationFrame~ loop engine
     8. =WebGL= rendered animations based on rendering images onscreen using =Canvas API= and =OpenGL= shader interpolation engine
 
-Each of above mentioned animation technologies is native to all modern web browsers and each presents its unique approach to content display and animation rendition. HTML elements are objects present in the DOM and are subject to surrounding automated mechanisms for layout responsivity. Absolutely positioned HTML elements are exclueded from those mechanisms and require programatic coordinate asignment to deterimine their position on screen. SVG elements are similar in that matter, as they are part of the DOM structure and require coordinates, but are rendered through a different SVG engine. CSS features two distinct mechanisms for rendering animations. One is its /transition/ mechanism that can interpolate smooth transitions between any two states for any numerically valued DOM attribute. It is the basis of CSS animation API and its execution is primarily CPU based. Other is CSS transformation mechanism which doesn't act on browsers automatic layout mechanisms, but renders on top of it, and is optimized through the browser's compositing layer system and promoted to GPU rendering. Both of those mechanisms are applicable for animating HTML or SVG DOM elements. JavaScript is, in this scenario, a browser run programming language that can calculate representation for animation of any number of DOM attributes and then dynamically apply it to the DOM presentation. In this context, it is executed on the CPU in a single-threaded manner. Web animation API is also based on JavaScript and is used in this application to generate keyframe animation definitions to be run on CSS engine. Canvas API is another interface for JavaScript programs that doesn't render DOM elements, but rather presents a stage for programatically altering values of pixels in a grid bounded by ~<canvas>~ element's borders. Canvas API comes with many mathematical functions predefined for selecting geometrical areas of pixels. Canvas API provides also an interface for execution of WebGL instructions which come in shape of predefined shaders processed exclusively on GPUs. It is similar to CSS animations in a manner that it provides interface to provide just keyframe instructions for the animation and its native engine generates optimized machine instructions to be executed on hardware. Canvas API provides a JavaScript wrapper for contructing instructions in GLSL (OpenGL Shading Language) and sending them to the GPU for execution. In this application we use an abstraction of this layer in the form of popular library =tree.js=.  
+Each of above mentioned animation technologies is native to all modern web browsers and each presents its unique approach to content display and animation rendition. HTML elements are objects present in the DOM and are subject to surrounding automated mechanisms for layout responsivity. Absolutely positioned HTML elements are exclueded from those mechanisms and require programatic coordinate asignment to deterimine their position on screen. SVG elements are similar in that matter, as they are part of the DOM structure and require coordinates, but are rendered through a different SVG engine. CSS features two distinct mechanisms for rendering animations. One is its /transition/ mechanism that can interpolate smooth transitions between any two states for any numerically valued DOM attribute. It is the basis of CSS animation API and its execution is primarily CPU based. Other is CSS transformation mechanism which doesn't act on browsers automatic layout mechanisms, but renders on top of it, and is optimized through the browser's compositing layer system and promoted to GPU rendering. Both of those mechanisms are applicable for animating HTML or SVG DOM elements. JavaScript is, in this scenario, a browser run programming language that can calculate representation for animation of any number of DOM attributes and then dynamically apply it to the DOM presentation. In this context, it is executed on the CPU in a single-threaded manner. Web animation API is also based on JavaScript and is used in this application to generate keyframe animation definitions to be run on CSS engine. Canvas API is another interface for JavaScript programs that doesn't render DOM elements, but rather presents a stage for programatically altering values of pixels in a grid bounded by ~<canvas>~ element's borders. Canvas API comes with many mathematical functions predefined for selecting geometrical areas of pixels. It also provides an interface for execution of WebGL instructions which come in shape of vertex array based shaders processed exclusively on GPUs. It is similar to CSS animations in a manner that it provides interface to provide just keyframe instructions for the animation and its native engine generates optimized machine instructions to be executed on hardware. Canvas API provides a JavaScript wrapper for contructing instructions in GLSL (OpenGL Shading Language) and sending them to the GPU for execution. In this application we use an abstraction of this layer in the form of popular library =tree.js=.  
 
-Application developed here for testing performance of different web native animation technologies presents a simple user interface for defining parameters which deterimine the complexity of animation to be rendered on screen. The base concept of animation to be tested is a composition of arbitrarily large number of simple circular elements of same size and colour and layed out in a grid-like manner across the screen, each row accomodating for 50 of them. Elements are animated in a four segment animation, moving on a square shaped path with a side length equal to a width of each circle. Additional parameters control the intensification of complexity starting from the base animation. Increment parameter is of integer type and controls the number of elements needed to accomodate in render. Random motion parameter is a boolean that offsets each point of the square motion path by a random percentage of its size, ensuring in that way that each circle gets it's unique motion path which prevents global optimisations. Parameter of distance acts as a multplier on those path changes ensuring the frequent overalp of varius shapes. Parameter of random colour is also a boolean that adds to the animation requirement for raching a different random color on the end of each of four segments of animation loop. Parameter of blending does the same thing as that of random colour, but for elements opacity, making the rendering of elements' overlaps resource demanding. 
+Application developed here for testing performance of different web native animation technologies presents a simple user interface for defining parameters which deterimine the complexity of animation to be rendered on screen. The base concept of animation to be tested is a composition of arbitrarily large number of simple circular elements of same size and colour and layed out in a grid-like manner across the screen, each row accomodating for 50 of them. Elements are animated in a four segment animation, moving on a square shaped path with a side length equal to a width of each circle. Additional parameters control the intensification of complexity starting from the base animation. Increment parameter is of integer type and controls the number of elements needed to accomodate in render. Random motion parameter is a boolean that offsets each point of the square motion path by a random percentage of its size, ensuring in that way that each circle gets it's unique motion path which prevents global optimisations. Parameter of distance acts as a multplier on those path changes ensuring the frequent overalp of varius shapes. Parameter of random colour is also a boolean that adds to the animating requirements one of reaching a different random color on the end of each of four segments of animation loop. Parameter of blending does the same thing as that of random colour, but for elements opacity, making the rendering of elements' overlaps resource demanding. 
 
 To ensure the comparability of gotten test results, this application preloads and reads-in all necessary scripts during its primary page load. In this way, any bandwith or connectivity issues are made irrelevant for measuring its execution. Each possible animation is run by a single parent function and all parent functions are developed to feature same code snippets for creating definitions for animations for each requested element and for running animation execution, varying only direct calls to respective animation API selected. Application code and its detailed documentation are made available for [[https://trpquo.github.io/browser_benchmarking/][viewing]] or [[https://github.com/Trpquo/browser_benchmarking][downloading]] on our public repository.
 
@@ -37,7 +37,7 @@ Minimal graphic user interface of the application was build using native HTML an
   	    <form id="dashboard" method="post">
   		<fieldset>
   		    <legend>Main</legend>
-  		    <label for="mode">Choose a platform</label>
+  		    <label for="mode">Animation technique</label>
   		    <select id="mode" name="mode">
   			<option value="HTML+CSS">HTML + CSS</option>
   			<option value="SVG+CSS">SVG + CSS</option>
@@ -46,6 +46,11 @@ Minimal graphic user interface of the application was build using native HTML an
   			<option value="JS+Canvas">JS + Canvas</option>
   			<option value="WebGL+Canvas">WebGL + Canvas</option>
   		    </select>
+		    <span>
+			  <!-- applicable only for CSS animations -->
+			  <input name="transformations" id="transformations" type="checkbox" checked />
+			  <label for="transformations">Use transformations</label>
+		    </span>
   		</fieldset>
   		<fieldset>
   		    <legend>Options</legend>
@@ -68,10 +73,6 @@ Minimal graphic user interface of the application was build using native HTML an
   			<span>
   				<input name="blending" id="blending" type="checkbox" checked />
   				<label for="blending">Add blending</label>
-  			</span>
-  			<span>
-  				<input name="transformations" id="transformations" type="checkbox" checked />
-  				<label for="transformations">Use transformations</label>
   			</span>
   		</fieldset>
   		<input type="submit" value="Generate" />
@@ -96,8 +97,13 @@ CSS styling continues this conservative trend to prevent taking over of system r
   	 &:not(:last-of-type) {
   	 padding-right: .5rem;
   	 margin-right: .5rem;
-  	 border-right: 2px solid gray;
+  	 border-right: 2px solid darkgray;
   	 }
+      }
+      select + span {
+  	padding-left: .5rem;
+  	margin-left: .5rem;
+  	border-left: 2px solid darkgray;
       }
       input[type=submit] {
   	 padding: .5rem;
@@ -145,6 +151,10 @@ CSS styling continues this conservative trend to prevent taking over of system r
   	 display: block;
       }
   }
+  .hidden {
+      opacity: 0;
+      transition: opacity .25s;
+  }
 #+end_src
 
 ** Defining and running animations
@@ -170,7 +180,7 @@ There are some common utility functions and global parameters that are defined i
   const spin = ()=> Math.random() < 0.5 ? -1 : 1;
 
   // function to calculate random offset from common path
-  const push = (movement, multiplier)=>random(movement)*dotDiameter*multiplier*spin()/2
+  const push = (movement, multiplier)=>random(movement)*(dotDiameter/2)*multiplier*spin()
 
   // function to calculate random color values, from 150-255 per RGB color channel; and .3-1 for opacity
   const randomRGBA = (color, opacity)=>{
@@ -220,15 +230,15 @@ The most important common function for our purpose is the one that generates key
   ] 
 #+end_src
 
+*** Parent functions to setup and start the animation processes
+
+All parent functions catch user defined parameters as arguments in the same way.
 #+name: catch-parameters
 #+begin_src js 
   const { count, random:movement, distance:multiplier, color, blending:opacity } = settings
-  let keyframes = []
-  let dots = []
-  let ctx = null // needed for Canvas clearance
+  let keyframes = [], dots = [], ctx = null // ctx test needed for Canvas clearance
 #+end_src
 
-*** Parent functions to setup and start the animation processes
 **** For CSS driven animations
 
 Special function is developed for defining and running CSS driven animations within HTML and SVG document structures. 
@@ -696,6 +706,21 @@ Interface for the widget is attached to the bottom of the form.
 		</fieldset>
 	    </form>
 	</div>
+#+end_src
+
+Additionally, another ~EventListener~ is added to ease the user interaction with dashboard by hiding settings not applicable to chosen type of animation.
+
+#+begin_src js :tangle script.js
+  const transformationsCheckbox = document.getElementById('transformations').parentNode,
+        modeSelect = document.getElementById('mode')
+
+  modeSelect.addEventListener('change', ()=>{
+      if (modeSelect.value.indexOf('CSS') === -1) {
+  	transformationsCheckbox.classList.add('hidden')
+      } else {
+  	transformationsCheckbox.classList.remove('hidden')
+      }
+  })
 #+end_src
 
 The user interface form is followed by empty ~<div>~ element for serving as the stage for placing elements to be animated.
