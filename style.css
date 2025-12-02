@@ -39,6 +39,8 @@
 
 #container {
     position: relative;
+    overflow: hidden;
+    padding-bottom: 20vh;
 
     div, span {
 	 display: inline-block;

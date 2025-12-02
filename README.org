@@ -29,7 +29,7 @@ Minimal graphic user interface of the application was build using native HTML an
   <html>
       <head>
           <meta charset="UTF-8"/>
-          <title>Benchmarking</title>
+          <title>BB 4 CDCO-BMWAS</title>
   	<link href="style.css" rel="stylesheet"/>
       </head>
       <body>
@@ -81,68 +81,70 @@ CSS styling continues this conservative trend to prevent taking over of system r
 
 #+begin_src css :tangle style.css
 
-	 :root, :root > * {
-	     margin: 0;
-	     padding: 0;
-	     font-size: max(.5vw, 16px);
-	 }
-	 #dashboard {
-	     padding: 1rem;
-	     padding-left: 220px;
-	     background-color: lightgray;
+  :root, :root > * {
+      margin: 0;
+      padding: 0;
+      font-size: max(.5vw, 16px);
+  }
+  #dashboard {
+      padding: 1rem;
+      padding-left: 220px;
+      background-color: lightgray;
 
-	     span {
-		 white-space: nowrap;
-		 &:not(:last-of-type) {
-		 padding-right: .5rem;
-		 margin-right: .5rem;
-		 border-right: 2px solid gray;
-		 }
-	     }
-	     input[type=submit] {
-		 padding: .5rem;
-		 background-color: forestgreen;
-		 color: white;
-		 border: 0;
-		 margin-top: 1rem;
-	     }
-	     fieldset.fps {
-		 float: right;
-		 #fps {
-		     width: 4rem;
-		     background-color: #333;
-		     color: #df6;		     
-		     text-align: right;
-		 }
-		 label[for=fps_on] {
-		     display: none;
-		 }
-	     }
-	 }
+      span {
+  	 white-space: nowrap;
+  	 &:not(:last-of-type) {
+  	 padding-right: .5rem;
+  	 margin-right: .5rem;
+  	 border-right: 2px solid gray;
+  	 }
+      }
+      input[type=submit] {
+  	 padding: .5rem;
+  	 background-color: forestgreen;
+  	 color: white;
+  	 border: 0;
+  	 margin-top: 1rem;
+      }
+      fieldset.fps {
+  	 float: right;
+  	 #fps {
+  	     width: 4rem;
+  	     background-color: #333;
+  	     color: #df6;		     
+  	     text-align: right;
+  	 }
+  	 label[for=fps_on] {
+  	     display: none;
+  	 }
+      }
+  }
 
-	 #container {
-	     position: relative;
+  #container {
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 20vh;
 
-	     div, span {
-		 display: inline-block;
-		 width: 2vw;
-		 height: 2vw;
-		 background-color: rgba(155,155,155,1);
-		 border-radius: 50%;
-		 animation-timing-function: linear;
-	     }
-	     svg {
-		 overflow: visible;
-		 g, circle {
-		     r: 1vw;
-		     fill: rgba(155,155,155,1);
-		     animation-timing-function: linear;
-		 }
-	     }
-	     canvas {
-		 display: block;
-	     }
-	 }
+      div, span {
+  	 display: inline-block;
+  	 width: 2vw;
+  	 height: 2vw;
+  	 background-color: rgba(155,155,155,1);
+  	 border-radius: 50%;
+  	 animation-timing-function: linear;
+      }
+      svg {
+  	 overflow: visible;
+  	 g, circle {
+  	     r: 1vw;
+  	     fill: rgba(155,155,155,1);
+  	     animation-timing-function: linear;
+  	 }
+      }
+      canvas {
+  	 display: block;
+      }
+  }
 #+end_src
 
 ** Defining and running animations
